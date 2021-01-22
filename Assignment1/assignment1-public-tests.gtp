@@ -1,0 +1,111 @@
+boardsize 7
+clear_board
+play B C6
+play W C5
+play B D5
+play W C4
+play B E4
+play W C3
+00 gogui-rules_final_result
+#?[unknown]
+
+play B F3
+play W C2
+play B G2
+10 gogui-rules_final_result
+#?[black]
+
+20 gogui-rules_legal_moves
+#?[]
+
+clear_board
+play B B7
+play W C7
+play B C6
+play W D6
+play B D7
+play W E7
+play B E6
+play W F5
+play B E5
+play W D5
+play B C5
+play W A6
+play B B6
+play W B5
+play B C4
+play W D4
+play B E4
+play W C3
+play B D3
+play W E3
+play B F3
+play W F4
+play B E2
+play W F2
+play B G1
+play W G2
+play B G3
+play W G4
+play B G5
+play W G6
+play B G7
+play W F7
+play B F6
+play W D2
+play B B4
+play W F1
+play B A4
+play W A3
+play B B3
+play W A5
+play B A7
+play W C1
+play B C2
+play W D1
+play B E1
+play W B2
+play B A2
+play W A1
+
+30 gogui-rules_legal_moves
+#?[b1]
+
+40 genmove b
+#?[b1]
+
+play B B1
+
+50 gogui-rules_final_result
+#?[draw]
+
+60 genmove b
+#?[pass]
+
+70 genmove w
+#?[pass]
+
+clear_board
+play B A1
+
+play B A2
+play B A3
+play B A4
+play B A5
+
+80 genmove w
+#?[resign]
+
+clear_board
+90 play C A1
+#?[illegal move: "c" wrong color]
+
+100 play B A10
+#?[illegal move: "a10" wrong coordinate]
+
+play B A1
+110 play W A1
+#?[illegal move: "a1" occupied]
+
+
+
