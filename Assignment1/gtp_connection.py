@@ -240,10 +240,13 @@ class GtpConnection:
     def gogui_rules_final_result_cmd(self, args):
         """ Implement this function for Assignment 1 """
 
-        # Two cases:
+        # Three cases:
         #       Five or more stones, player wins
+        #           self.respond("{}".format(board_color)) 
         #       Board is full, no legal moves left to play and no five or more stone connection, draw
-
+        #           self.respond("draw")
+        #       Game has not ended yet
+        #           self.respong("unknown")
 
 
         self.respond("unknown")
@@ -296,14 +299,14 @@ class GtpConnection:
         move_as_string = format_point(move_coord)                   #Convert coordinate to a readable label
         
         if self.board.is_legal(move, color):                        #Check if the move is legal
-            self.board.play_move(move, color)                       #Make the move on the board
-            self.respond(move_as_string)                            #Respond to user with the readable label of coordinate
-        else:
-            #Five in a row
+            #Five in a row occurs
                 #self.repsond("resign")
             #Draw, # of legal move is 0
                 #self.respong("pass")
             #else
+            self.board.play_move(move, color)                       #Make the move on the board
+            self.respond(move_as_string)                            #Respond to user with the readable label of coordinate
+        else:
             self.respond("Illegal move: {}".format(move_as_string))
 
     """
