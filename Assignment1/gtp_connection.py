@@ -247,9 +247,15 @@ class GtpConnection:
         #           self.respond("draw")
         #       Game has not ended yet
         #           self.respong("unknown")
+        """  
+        if    
+            self.respond(winner)
 
-
-        self.respond("unknown")
+        if not (self.board.get_empty_points):   #List is empty, board is full
+            self.respond("draw")
+        else:
+            self.respond("unknown")
+        """
 
     def play_cmd(self, args):
         """ Modify this function for Assignment 1 """
@@ -289,23 +295,20 @@ class GtpConnection:
         """ generate a move for color args[0] in {'b','w'} """
 
         board_color = args[0].lower()                               #Get colour from arugment and store the value of the first char.
-        
         color = color_to_int(board_color)                           #Convert the first char. of the color to correct integer code
-        
         move = self.go_engine.get_move(self.board, color)           #Decide where to play(move) on the board 
-        
         move_coord = point_to_coord(move, self.board.size)          #Convert point to coordinate for the move
-        
         move_as_string = format_point(move_coord)                   #Convert coordinate to a readable label
         
         if self.board.is_legal(move, color):                        #Check if the move is legal
+            self.board.play_move(move, color)                       #Make the move on the board
             #Five in a row occurs
                 #self.repsond("resign")
-            #Draw, # of legal move is 0
-                #self.respong("pass")
+            #if not (self.board.get_empty_points)                   #Board is full, game over it is a draw
+                #self.respond("pass")
             #else
-            self.board.play_move(move, color)                       #Make the move on the board
             self.respond(move_as_string)                            #Respond to user with the readable label of coordinate
+            
         else:
             self.respond("Illegal move: {}".format(move_as_string))
 
