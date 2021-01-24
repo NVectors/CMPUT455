@@ -239,6 +239,13 @@ class GtpConnection:
             
     def gogui_rules_final_result_cmd(self, args):
         """ Implement this function for Assignment 1 """
+
+        # Two cases:
+        #       Five or more stones, player wins
+        #       Board is full, no legal moves left to play and no five or more stone connection, draw
+
+
+
         self.respond("unknown")
 
     def play_cmd(self, args):
@@ -277,15 +284,26 @@ class GtpConnection:
     def genmove_cmd(self, args):
         """ Modify this function for Assignment 1 """
         """ generate a move for color args[0] in {'b','w'} """
-        board_color = args[0].lower()
-        color = color_to_int(board_color)
-        move = self.go_engine.get_move(self.board, color)
-        move_coord = point_to_coord(move, self.board.size)
-        move_as_string = format_point(move_coord)
-        if self.board.is_legal(move, color):
-            self.board.play_move(move, color)
-            self.respond(move_as_string)
+
+        board_color = args[0].lower()                               #Get colour from arugment and store the value of the first char.
+        
+        color = color_to_int(board_color)                           #Convert the first char. of the color to correct integer code
+        
+        move = self.go_engine.get_move(self.board, color)           #Decide where to play(move) on the board 
+        
+        move_coord = point_to_coord(move, self.board.size)          #Convert point to coordinate for the move
+        
+        move_as_string = format_point(move_coord)                   #Convert coordinate to a readable label
+        
+        if self.board.is_legal(move, color):                        #Check if the move is legal
+            self.board.play_move(move, color)                       #Make the move on the board
+            self.respond(move_as_string)                            #Respond to user with the readable label of coordinate
         else:
+            #Five in a row
+                #self.repsond("resign")
+            #Draw, # of legal move is 0
+                #self.respong("pass")
+            #else
             self.respond("Illegal move: {}".format(move_as_string))
 
     """
