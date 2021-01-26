@@ -265,3 +265,10 @@ class GoBoard(object):
         if self.last2_move != None and self.last2_move != PASS:
             board_moves.append(self.last2_move)
             return 
+
+    def check_winner(self, point):
+        """
+        Check row, column and diagonal for five or more stones connected
+        """
+
+        

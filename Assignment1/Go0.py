@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # /usr/local/bin/python3
-# Set the path to your python3 above
+# Set the path to your python3 aboveclear
 
 from gtp_connection import GtpConnection
 from board_util import GoBoardUtil

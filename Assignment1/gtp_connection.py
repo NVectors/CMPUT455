@@ -250,12 +250,12 @@ class GtpConnection:
         """  
         if    
             self.respond(winner)
-
+        """
         if not (self.board.get_empty_points):   #List is empty, board is full
             self.respond("draw")
         else:
             self.respond("unknown")
-        """
+        #"""
 
     def play_cmd(self, args):
         """ Modify this function for Assignment 1 """
@@ -302,11 +302,11 @@ class GtpConnection:
         
         if self.board.is_legal(move, color):                        #Check if the move is legal
             self.board.play_move(move, color)                       #Make the move on the board
-            #Five in a row occurs
+            #Five in a row occurs                                   #Check for winner
                 #self.repsond("resign")
-            #if not (self.board.get_empty_points)                   #Board is full, game over it is a draw
-                #self.respond("pass")
-            #else
+            if not (self.board.get_empty_points)                    #Board is full, game over it is a draw
+                self.respond("pass")
+            else
             self.respond(move_as_string)                            #Respond to user with the readable label of coordinate
             
         else:
