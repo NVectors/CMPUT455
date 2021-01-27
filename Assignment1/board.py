@@ -197,40 +197,13 @@ class GoBoard(object):
         Play a move of color on point
         Returns boolean: whether move was legal
         """
-        assert is_black_white(color)
-        # Special cases
-        if point == PASS:
-            self.ko_recapture = None
-            self.current_player = GoBoardUtil.opponent(color)
-            self.last2_move = self.last_move
-            self.last_move = point
-            return True
-        elif self.board[point] != EMPTY:
-            return False
-        if point == self.ko_recapture:
+        assert is_black_white(color), "Not a valid player of Black or White"
+        
+        # Check if point on board is already filled
+        if (self.board[point] != EMPTY):
             return False
 
-        # General case: deal with captures, suicide, and next ko point
-        opp_color = GoBoardUtil.opponent(color)
-        in_enemy_eye = self._is_surrounded(point, opp_color)
         self.board[point] = color
-        single_captures = []
-        neighbors = self._neighbors(point)
-        for nb in neighbors:
-            if self.board[nb] == opp_color:
-                single_capture = self._detect_and_process_capture(nb)
-                if single_capture != None:
-                    single_captures.append(single_capture)
-        block = self._block_of(point)
-        if not self._has_liberty(block):  # undo suicide move
-            self.board[point] = EMPTY
-            return False
-        self.ko_recapture = None
-        if in_enemy_eye and len(single_captures) == 1:
-            self.ko_recapture = single_captures[0]
-        self.current_player = GoBoardUtil.opponent(color)
-        self.last2_move = self.last_move
-        self.last_move = point
         return True
 
     def neighbors_of_color(self, point, color):
@@ -266,9 +239,69 @@ class GoBoard(object):
             board_moves.append(self.last2_move)
             return 
 
-    def check_winner(self, point):
+    def check_for_five(self, point, color):
         """
         Check row, column and diagonal for five or more stones connected
         """
 
-        
+        # Check Hortizontally
+        left = point - 1
+        right = point + 1
+        count = 1
+        # Left or Right stone of the current point is the same color
+        while (self.board[left] == color or self.board[right] == color):
+            if self.board[left] == color:
+                count += 1
+                left -= 1   # Keep traversing left
+            if self.board[right] == color:
+                count += 1
+                right +=1   # Keep traversing right
+        if count >= 5:      # Five or more stones connected
+            return True     # There is a winner
+
+        # Check Vertically
+        top = point - self.size
+        bottom = point + self.size
+        count = 1
+        # Top or Bottom stone of the current point is the same color
+        while (self.board[top] == color or self.board[bottom] == color):
+            if self.board[top] == color:
+                count += 1
+                top -= self.size    # Keep traversing upwards
+            if self.board[bottom] == color:
+                count += 1
+                bottom += self.size # Keep traversing downwards
+        if count >= 5:
+            return True
+
+        # Check Diagonally (Bottom left to Top right: / )
+        length = self.size - 1
+        topRight = point - length
+        botLeft = point + length
+        count = 1
+        while (self.board[topRight] == color or self.board[botLeft] == color):
+            if self.board[topRight] == color:
+                count += 1
+                topRight -= length   # Keep traversing upwards diagonally
+            if self.board[botLeft] == color:
+                count += 1
+                botLeft += length # Keep traversing downwards diagonally
+        if count >= 5:
+            return True
+
+        # Check Diagonally (Top left to Bottom right: \ )
+        topLeft = point - self.NS
+        botRight = point + self.NS
+        count = 1
+        while (self.board[topLeft] == color or self.board[botRight] == color):
+            if self.board[topLeft] == color:
+                count += 1
+                topLeft -= self.NS
+            if self.board[botRight] == color:
+                count += 1
+                botRight += self.NS
+        if count >= 5:
+            return True
+
+        return False    # Went through all the checks 
+            

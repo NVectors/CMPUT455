@@ -37,6 +37,7 @@ class GtpConnection:
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
+        self.game_status = "playing"    # Default game status 
         self.commands = {
             "protocol_version": self.protocol_version_cmd,
             "quit": self.quit_cmd,
@@ -174,6 +175,7 @@ class GtpConnection:
     def clear_board_cmd(self, args):
         """ clear the board """
         self.reset(self.board.size)
+        self.game_status = "playing"    #Reset game status
         self.respond()
 
     def boardsize_cmd(self, args):
@@ -239,23 +241,20 @@ class GtpConnection:
             
     def gogui_rules_final_result_cmd(self, args):
         """ Implement this function for Assignment 1 """
-
-        # Three cases:
-        #       Five or more stones, player wins
-        #           self.respond("{}".format(board_color)) 
-        #       Board is full, no legal moves left to play and no five or more stone connection, draw
-        #           self.respond("draw")
-        #       Game has not ended yet
-        #           self.respong("unknown")
-        """  
-        if    
-            self.respond(winner)
         """
-        if not (self.board.get_empty_points):   #List is empty, board is full
+        Three cases:
+            Five or more stones, there a winner black or white
+            Board is full, no legal moves left to play and no winner, it's a draw
+            Game has not ended yet
+        """
+        if (self.game_status == "b"):           # Player with black stones won the game
+            self.respond("black")
+        elif (self.game_status == "w"):         # Player with the white stones won the game
+            self.game_status("white")
+        elif (self.game_status == "tied"):      # Board is full, game over it is a draw
             self.respond("draw")
-        else:
+        elif (self.game_status == "playing"):   # Game in progress
             self.respond("unknown")
-        #"""
 
     def play_cmd(self, args):
         """ Modify this function for Assignment 1 """
@@ -294,23 +293,41 @@ class GtpConnection:
         """ Modify this function for Assignment 1 """
         """ generate a move for color args[0] in {'b','w'} """
 
-        board_color = args[0].lower()                               #Get colour from arugment and store the value of the first char.
-        color = color_to_int(board_color)                           #Convert the first char. of the color to correct integer code
-        move = self.go_engine.get_move(self.board, color)           #Decide where to play(move) on the board 
-        move_coord = point_to_coord(move, self.board.size)          #Convert point to coordinate for the move
-        move_as_string = format_point(move_coord)                   #Convert coordinate to a readable label
-        
-        if self.board.is_legal(move, color):                        #Check if the move is legal
-            self.board.play_move(move, color)                       #Make the move on the board
-            #Five in a row occurs                                   #Check for winner
-                #self.repsond("resign")
-            if not (self.board.get_empty_points)                    #Board is full, game over it is a draw
-                self.respond("pass")
-            else
-            self.respond(move_as_string)                            #Respond to user with the readable label of coordinate
+        board_color = args[0].lower()                               # Get colour from argument 
+        if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
+            self.respond("Illegal move: Must play 'b' or 'w'")
+            return
+
+        # Check if opponent has victory before making a move
+        if self.game_status == "b" and board_color == "w":
+            self.respond("resign")
+            return
+        elif self.game_status == "w" and board_color == "b":        
+            self.respond("resign")
+            return
+
+        color = color_to_int(board_color)                           # Convert the first char. of the color to correct integer code
+        move = self.go_engine.get_move(self.board, color)           # Decide where to play(move) on the board 
+        move_coord = point_to_coord(move, self.board.size)          # Convert point to coordinate for the move
+        move_as_string = format_point(move_coord)                   # Convert coordinate to a readable label
+        if (move == None):                                          # Move was returned as PASS (none) from board_util.py
+            self.respond("pass")
+
+        elif self.board.is_legal(move, color):                      # Check if the move is legal
+            self.board.play_move(move, color)                       # Make the move on the board
+
+            if self.board.check_for_five(move, color):              # Check if there a winner
+                self.game_status = board_color                      # Game status is either "b" or "w"
+
+            if (not self.game_status == "b") or (not self.game_status == "w"):
+                if  not (self.board.get_empty_points):              # Board is filled and no winner         
+                    self.game_status = "tied"                                   
+                    self.respond("pass")                            
+
+            self.respond(move_as_string)                            # Respond to user with the move coordinate as a label
             
         else:
-            self.respond("Illegal move: {}".format(move_as_string))
+            self.respond("Illegal move: {}".format(move_as_string)) # Move was illegal 
 
     """
     ==========================================================================
