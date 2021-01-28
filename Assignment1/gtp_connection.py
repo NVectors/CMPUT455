@@ -296,7 +296,7 @@ class GtpConnection:
             try:
                 coord = move_to_coord(args[1], self.board.size)
             except ValueError:
-                self.respond('illegal move: "{}" wrong coordinate'.format(board_move))
+                self.respond('illegal move: "{}" wrong coordinate'.format(board_move.lower()))
                 return
 
             if coord:
