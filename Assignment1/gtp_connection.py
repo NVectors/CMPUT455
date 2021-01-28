@@ -281,6 +281,11 @@ class GtpConnection:
         """
         try:
             board_color = args[0].lower()
+
+            if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
+                self.respond("illegal move: {} wrong color".format(board_color))
+                return
+
             board_move = args[1]
             color = color_to_int(board_color)
             if args[1].lower() == "pass":
@@ -297,7 +302,7 @@ class GtpConnection:
                 )
                 return
             if not self.board.play_move(move, color):
-                self.respond("Illegal Move: {}".format(board_move))
+                self.respond("Illegal Move: {} occupied".format(board_move))
                 return
             else:
                 self.debug_msg(
@@ -336,6 +341,7 @@ class GtpConnection:
             if self.board.check_for_five(move, color):              # Check if there a winner
                 self.game_status = board_color                      # Game status is either "b" or "w"
 
+
             if (not self.game_status == "b") or (not self.game_status == "w"):
                 if  not (self.board.get_empty_points):              # Board is filled and no winner         
                     self.game_status = "tied"                                                               
@@ -343,7 +349,7 @@ class GtpConnection:
             self.respond(move_as_string)                            # Respond to user with the move coordinate as a label
             
         else:
-            self.respond("illegal move: {} occupied".format(move_as_string)) # Move was illegal 
+            self.respond("illegal move: {}".format(move_as_string)) # Move was illegal 
 
     """
     ==========================================================================
@@ -409,7 +415,7 @@ def format_point(move):
     Return move coordinates as a string such as 'A1', or 'PASS'.
     """
     assert MAXSIZE <= 25
-    column_letters = "ABCDEFGHJKLMNOPQRSTUVWXYZ"
+    column_letters = "abcdefghijklmnopqrstuvwxyz" #"ABCDEFGHJKLMNOPQRSTUVWXYZ"
     if move == PASS:
         return "PASS"
     row, col = move
@@ -442,7 +448,7 @@ def move_to_coord(point_str, board_size):
     except (IndexError, ValueError):
         raise ValueError("invalid point: '{}'".format(s))
     if not (col <= board_size and row <= board_size):
-        raise ValueError("point off board: '{}'".format(s))
+        raise ValueError('illegal move: "{}" wrong coordinate'.format(s))
     return row, col
 
 
