@@ -100,8 +100,8 @@ clear_board
 90 play C A1
 #?[illegal move: "c" wrong color]
 
-100 play B A10
-#?[illegal move: "a10" wrong coordinate]
+100 p]lay B A10
+#?[illegal move: "a10" wrong coordinate
 
 play B A1
 110 play W A1

@@ -415,7 +415,7 @@ def format_point(move):
     Return move coordinates as a string such as 'A1', or 'PASS'.
     """
     assert MAXSIZE <= 25
-    column_letters = "abcdefghijklmnopqrstuvwxyz" # Test wants it in lowercase "ABCDEFGHJKLMNOPQRSTUVWXYZ"
+    column_letters = "ABCDEFGHJKLMNOPQRSTUVWXYZ"  # Test wants it in lowercase 
     if move == PASS:
         return "PASS"
     row, col = move
@@ -446,9 +446,9 @@ def move_to_coord(point_str, board_size):
         if row < 1:
             raise ValueError
     except (IndexError, ValueError):
-        raise ValueError('illegal move: "{}" wrong coordinate'.format(s))
+        raise ValueError("invalid point: '{}'".format(s))
     if not (col <= board_size and row <= board_size):
-        raise ValueError('illegal move: "{}" wrong coordinate'.format(s))
+        raise ValueError("point off board: '{}'".format(s)) # Tests wamts it as illegal move: "a10" wrong coordinate
     return row, col
 
 
