@@ -283,7 +283,7 @@ class GtpConnection:
             board_color = args[0].lower()
 
             if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
-                self.respond("illegal move: {} wrong color".format(board_color))
+                self.respond('illegal move: "' + board_color + '" wrong color')
                 return
 
             board_move = args[1]
@@ -302,7 +302,7 @@ class GtpConnection:
                 )
                 return
             if not self.board.play_move(move, color):
-                self.respond("Illegal Move: {} occupied".format(board_move))
+                self.respond('illegal move: "' + board_move + '" occupied')
                 return
             else:
                 self.debug_msg(
@@ -318,7 +318,7 @@ class GtpConnection:
 
         board_color = args[0].lower()                               # Get colour from argument 
         if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
-            self.respond("Illegal move: Must play 'b' or 'w'")
+           self.respond('illegal move: "' + board_color + '" wrong color')
             return
 
         # Check if opponent has victory before making a move
@@ -415,7 +415,7 @@ def format_point(move):
     Return move coordinates as a string such as 'A1', or 'PASS'.
     """
     assert MAXSIZE <= 25
-    column_letters = "abcdefghijklmnopqrstuvwxyz" #"ABCDEFGHJKLMNOPQRSTUVWXYZ"
+    column_letters = "abcdefghijklmnopqrstuvwxyz" # Test wants it in lowercase "ABCDEFGHJKLMNOPQRSTUVWXYZ"
     if move == PASS:
         return "PASS"
     row, col = move
