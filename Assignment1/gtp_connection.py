@@ -283,8 +283,7 @@ class GtpConnection:
             board_color = args[0].lower()
 
             if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
-                self.respond("illegal move: '{}' wrong color".format(board_color))
-                #self.respond('illegal move: "' + board_color + '" wrong color')
+                self.respond('illegal move: "{}" wrong color'.format(board_color))
                 return
 
             board_move = args[1]
@@ -319,7 +318,7 @@ class GtpConnection:
 
         board_color = args[0].lower()                               # Get colour from argument 
         if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
-            self.respond("illegal move: '{}' wrong color".format(board_color))            
+            self.respond('illegal move: "{}" wrong color'.format(board_color))            
             return
 
         # Check if opponent has victory before making a move
@@ -447,9 +446,9 @@ def move_to_coord(point_str, board_size):
         if row < 1:
             raise ValueError
     except (IndexError, ValueError):
-        raise ValueError("invalid point: '{}'".format(s))
+        raise ValueError('illegal move: "{}" wrong coordinate'.format(s))
     if not (col <= board_size and row <= board_size):
-        raise ValueError("illegal move: '{}' wrong coordinate".format(s))
+        raise ValueError('illegal move: "{}" wrong coordinate'.format(s))
     return row, col
 
 
