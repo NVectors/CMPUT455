@@ -211,7 +211,22 @@ class GtpConnection:
 
     def gogui_rules_legal_moves_cmd(self, args):
         """ Implement this function for Assignment 1 """
-        self.respond()
+
+        """ If the game is over, return an empty list. Otherwise, return a list of all empty points on the board in sorted order. """
+
+        legalMoves = []
+        # If game is ongoing: 
+        if (self.game_status == "playing"):
+            emptyPositions = self.board.get_empty_points()
+
+            # Not used, but defining anyway for now
+            player = self.board.current_player
+            
+            for i in emptyPositions:
+                legalMoves.append(format_point(point_to_coord(i, self.board.size)))
+        
+        # Legal moves is only populated if game is in progress, else it is empty
+        self.respond(legalMoves)
         return
 
     def gogui_rules_side_to_move_cmd(self, args):
