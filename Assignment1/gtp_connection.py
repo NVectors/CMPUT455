@@ -318,7 +318,7 @@ class GtpConnection:
 
         board_color = args[0].lower()                               # Get colour from argument 
         if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
-           self.respond('illegal move: "' + board_color + '" wrong color')
+            self.respond('illegal move: "' + board_color + '" wrong color')
             return
 
         # Check if opponent has victory before making a move
