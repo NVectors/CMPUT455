@@ -215,7 +215,7 @@ class GtpConnection:
         """ If the game is over, return an empty list. 
         Otherwise, return a list of all empty points on the board in sorted order. 
         """
-        
+
         legalMoves = []
         # If game is ongoing: 
         if (self.game_status == "playing"):
@@ -330,7 +330,6 @@ class GtpConnection:
         move_as_string = format_point(move_coord)                   # Convert coordinate to a readable label
         if (move == None):                                          # Move was returned as PASS (none) from board_util.py
             self.respond("pass")
-
         elif self.board.is_legal(move, color):                      # Check if the move is legal
             self.board.play_move(move, color)                       # Make the move on the board
 
@@ -339,13 +338,12 @@ class GtpConnection:
 
             if (not self.game_status == "b") or (not self.game_status == "w"):
                 if  not (self.board.get_empty_points):              # Board is filled and no winner         
-                    self.game_status = "tied"                                   
-                    self.respond("pass")                            
+                    self.game_status = "tied"                                                               
 
             self.respond(move_as_string)                            # Respond to user with the move coordinate as a label
             
         else:
-            self.respond("Illegal move: {}".format(move_as_string)) # Move was illegal 
+            self.respond("illegal move: {} occupied".format(move_as_string)) # Move was illegal 
 
     """
     ==========================================================================
