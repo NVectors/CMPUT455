@@ -101,7 +101,7 @@ clear_board
 #?[illegal move: "c" wrong color]
 
 100 p]lay B A10
-#?[illegal move: "a10" wrong coordinate
+#?[illegal move: "a10" wrong coordinate]
 
 play B A1
 110 play W A1

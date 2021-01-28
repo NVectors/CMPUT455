@@ -332,8 +332,8 @@ class GtpConnection:
         color = color_to_int(board_color)                           # Convert the first char. of the color to correct integer code
         move = self.go_engine.get_move(self.board, color)           # Decide where to play(move) on the board 
         move_coord = point_to_coord(move, self.board.size)          # Convert point to coordinate for the move
-        move_as_string = format_point(move_coord)                   # Convert coordinate to a readable label
-        if (move == None):                                          # Move was returned as PASS (none) from board_util.py
+        move_as_string = format_point(move_coord).lower()           # Convert coordinate to a readable label
+        if (move == Pass):                                          # Move was returned as PASS (none) from board_util.py
             self.respond("pass")
         elif self.board.is_legal(move, color):                      # Check if the move is legal
             self.board.play_move(move, color)                       # Make the move on the board
@@ -415,7 +415,7 @@ def format_point(move):
     Return move coordinates as a string such as 'A1', or 'PASS'.
     """
     assert MAXSIZE <= 25
-    column_letters = "ABCDEFGHJKLMNOPQRSTUVWXYZ"  # Test wants it in lowercase 
+    column_letters = "ABCDEFGHJKLMNOPQRSTUVWXYZ"  
     if move == PASS:
         return "PASS"
     row, col = move
@@ -448,7 +448,7 @@ def move_to_coord(point_str, board_size):
     except (IndexError, ValueError):
         raise ValueError("invalid point: '{}'".format(s))
     if not (col <= board_size and row <= board_size):
-        raise ValueError("point off board: '{}'".format(s)) # Tests wamts it as illegal move: "a10" wrong coordinate
+        raise ValueError("point off board: '{}'".format(s)) # Tests wants it as illegal move: "a10" wrong coordinate
     return row, col
 
 
