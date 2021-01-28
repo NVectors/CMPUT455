@@ -293,7 +293,12 @@ class GtpConnection:
                 self.board.current_player = GoBoardUtil.opponent(color)
                 self.respond()
                 return
-            coord = move_to_coord(args[1], self.board.size)
+            try:
+                coord = move_to_coord(args[1], self.board.size)
+            except ValueError:
+                self.respond('illegal move: "{}" wrong coordinate'.format(board_move))
+                return
+
             if coord:
                 move = coord_to_point(coord[0], coord[1], self.board.size)
             else:
@@ -333,14 +338,13 @@ class GtpConnection:
         move = self.go_engine.get_move(self.board, color)           # Decide where to play(move) on the board 
         move_coord = point_to_coord(move, self.board.size)          # Convert point to coordinate for the move
         move_as_string = format_point(move_coord).lower()           # Convert coordinate to a readable label
-        if (move == Pass):                                          # Move was returned as PASS (none) from board_util.py
+        if (move == PASS):                                          # Move was returned as PASS (none) from board_util.py
             self.respond("pass")
         elif self.board.is_legal(move, color):                      # Check if the move is legal
             self.board.play_move(move, color)                       # Make the move on the board
 
             if self.board.check_for_five(move, color):              # Check if there a winner
                 self.game_status = board_color                      # Game status is either "b" or "w"
-
 
             if (not self.game_status == "b") or (not self.game_status == "w"):
                 if  not (self.board.get_empty_points):              # Board is filled and no winner         
@@ -448,7 +452,7 @@ def move_to_coord(point_str, board_size):
     except (IndexError, ValueError):
         raise ValueError("invalid point: '{}'".format(s))
     if not (col <= board_size and row <= board_size):
-        raise ValueError("point off board: '{}'".format(s)) # Tests wants it as illegal move: "a10" wrong coordinate
+        raise ValueError("point off board: '{}'".format(s)) 
     return row, col
 
 
