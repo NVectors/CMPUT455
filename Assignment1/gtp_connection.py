@@ -248,13 +248,32 @@ class GtpConnection:
         """
         try:
             board_color = args[0].lower()
-            board_move = args[1]
-            color = color_to_int(board_color)
-            if args[1].lower() == "pass":
-                self.board.play_move(PASS, color)
-                self.board.current_player = GoBoardUtil.opponent(color)
-                self.respond()
+            board_move = args[1].lower()
+
+
+            # Checking for Wrong Color
+            if (board_color != 'b' and board_color != 'w'):
+                self.error('illegall move "{}" wrong color'.format(args[0]))
                 return
+
+            color = color_to_int(board_color)
+
+            if(color != self.board.current_player):
+                self.error('illegall move "{}" wrong color'.format(args[0]))
+                return
+            
+
+            # Checking if wrong coordinate
+            if (ord(board_move[0]) - ord('a') > self.board.size or int(board_move[1:]) > self.board.size):
+                self.error('illegal move: "{}" wrong coordinate'.format(args[1]))
+                return
+    
+            if color == BORDER:
+                self.error('illegal move: "{}" wrong coordinate'.format(args[1]))
+                return
+
+
+            # Convert Args from GTP format to a point as defined in the board class
             coord = move_to_coord(args[1], self.board.size)
             if coord:
                 move = coord_to_point(coord[0], coord[1], self.board.size)
@@ -263,14 +282,17 @@ class GtpConnection:
                     "Error executing move {} converted from {}".format(move, args[1])
                 )
                 return
+
+            # Checking if Occupied
             if not self.board.play_move(move, color):
-                self.respond("Illegal Move: {}".format(board_move))
+                self.error('Illegal Move: "{}" occupied'.format(args[1]))
                 return
             else:
                 self.debug_msg(
                     "Move: {}\nBoard:\n{}\n".format(board_move, self.board2d())
                 )
             self.respond()
+
         except Exception as e:
             self.respond("Error: {}".format(str(e)))
 
