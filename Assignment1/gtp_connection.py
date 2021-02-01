@@ -273,7 +273,7 @@ class GtpConnection:
         if (self.game_status == "b"):           # Player with black stones won the game
             self.respond("black")
         elif (self.game_status == "w"):         # Player with the white stones won the game
-            self.game_status("white")
+            self.respond("white")
         elif (self.game_status == "tied"):      # Board is full, game over it is a draw
             self.respond("draw")
         elif (self.game_status == "playing"):   # Game in progress
