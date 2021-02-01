@@ -229,9 +229,9 @@ class GtpConnection:
                 legalMoves.append(format_point(
                     point_to_coord(i, self.board.size)).lower())
 
-            legalMoves.sort(key=lambda x: x[0])
+            # legalMoves.sort(key=lambda x: x[0])
 
-            self.respond(" ".join(legalMoves))
+            self.respond(" ".join(sorted(legalMoves)))
 
         else:
             self.respond()
