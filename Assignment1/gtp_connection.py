@@ -1,7 +1,6 @@
 """
 gtp_connection.py
 Module for playing games of Go using GoTextProtocol
-
 Parts of this code were originally based on the gtp module 
 in the Deep-Go project by Isaac Henrion and Amos Storkey 
 at the University of Edinburgh.
@@ -26,7 +25,6 @@ class GtpConnection:
     def __init__(self, go_engine, board, debug_mode=False):
         """
         Manage a GTP connection for a Go-playing engine
-
         Parameters
         ----------
         go_engine:
@@ -213,7 +211,9 @@ class GtpConnection:
     def gogui_rules_legal_moves_cmd(self, args):
         """ Implement this function for Assignment 1 """
 
-        """ If the game is over, return an empty list. Otherwise, return a list of all empty points on the board in sorted order. """
+        """ If the game is over, return an empty list. 
+        Otherwise, return a list of all empty points on the board in sorted order. 
+        """
 
         legalMoves = []
         # If game is ongoing:
@@ -225,13 +225,10 @@ class GtpConnection:
 
             for i in emptyPositions:
                 legalMoves.append(format_point(
-                    point_to_coord(i, self.board.size)).lower())
+                    point_to_coord(i, self.board.size)))
 
-            legalMoves.sort(key=lambda x: x[0])
-            self.respond(legalMoves)
-
-        else:
-            self.respond()
+        # Legal moves is only populated if game is in progress, else it is empty
+        self.respond(legalMoves)
         return
 
     def gogui_rules_side_to_move_cmd(self, args):
@@ -283,6 +280,12 @@ class GtpConnection:
         """
         try:
             board_color = args[0].lower()
+
+            if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
+                self.respond(
+                    'illegal move: "{}" wrong color'.format(board_color))
+                return
+
             board_move = args[1]
             color = color_to_int(board_color)
             if args[1].lower() == "pass":
@@ -290,7 +293,13 @@ class GtpConnection:
                 self.board.current_player = GoBoardUtil.opponent(color)
                 self.respond()
                 return
-            coord = move_to_coord(args[1], self.board.size)
+            try:
+                coord = move_to_coord(args[1], self.board.size)
+            except (IndexError, ValueError):
+                self.respond('illegal move: "{}" wrong coordinate'.format(
+                    board_move.lower()))
+                return
+
             if coord:
                 move = coord_to_point(coord[0], coord[1], self.board.size)
             else:
@@ -300,7 +309,8 @@ class GtpConnection:
                 )
                 return
             if not self.board.play_move(move, color):
-                self.respond("Illegal Move: {}".format(board_move))
+                self.respond('illegal move: "{}" occupied'.format(
+                    board_move.lower()))
                 return
             else:
                 self.debug_msg(
@@ -317,7 +327,7 @@ class GtpConnection:
         # Get colour from argument
         board_color = args[0].lower()
         if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
-            self.respond("Illegal move: Must play 'b' or 'w'")
+            self.respond('illegal move: "{}" wrong color'.format(board_color))
             return
 
         # Check if opponent has victory before making a move
@@ -335,11 +345,10 @@ class GtpConnection:
         # Convert point to coordinate for the move
         move_coord = point_to_coord(move, self.board.size)
         # Convert coordinate to a readable label
-        move_as_string = format_point(move_coord)
+        move_as_string = format_point(move_coord).lower()
         # Move was returned as PASS (none) from board_util.py
-        if (move == None):
+        if (move == PASS):
             self.respond("pass")
-
         # Check if the move is legal
         elif self.board.is_legal(move, color):
             # Make the move on the board
@@ -354,13 +363,12 @@ class GtpConnection:
                 # Board is filled and no winner
                 if not (self.board.get_empty_points):
                     self.game_status = "tied"
-                    self.respond("pass")
 
             # Respond to user with the move coordinate as a label
             self.respond(move_as_string)
 
         else:
-            self.respond("Illegal move: {}".format(
+            self.respond("illegal move: {}".format(
                 move_as_string))  # Move was illegal
 
     """
