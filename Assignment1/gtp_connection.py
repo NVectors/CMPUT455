@@ -230,7 +230,8 @@ class GtpConnection:
                     point_to_coord(i, self.board.size)).lower())
 
             legalMoves.sort(key=lambda x: x[0])
-            self.respond(legalMoves)
+
+            self.respond(" ".join(legalMoves))
 
         else:
             self.respond()
@@ -287,17 +288,15 @@ class GtpConnection:
 
             if(len(self.board.get_empty_points()) == 0):
                 self.game_status = "tied"
-            
 
             board_color = args[0].lower()
 
             board_move = args[1].lower()
 
             # Check if Game has ended
-           
+
             if(self.game_status != "playing"):
                 return
-
 
             # Checking for Wrong Color
             if (board_color != 'b' and board_color != 'w'):
@@ -315,9 +314,9 @@ class GtpConnection:
                 # Convert Args from GTP format to a point as defined in the board class
                 coord = move_to_coord(args[1], self.board.size)
             except (IndexError, ValueError):
-                self.error('illegal move: "{}" wrong coordinate'.format(args[1]))
+                self.error(
+                    'illegal move: "{}" wrong coordinate'.format(args[1]))
                 return
-            
 
             if coord:
                 move = coord_to_point(coord[0], coord[1], self.board.size)
@@ -332,16 +331,15 @@ class GtpConnection:
             if not self.board.play_move(move, color):
 
                 self.error('illegal move: "{}" occupied'.format(args[1]))
-                
+
                 return
             else:
                 self.debug_msg(
                     "Move: {}\nBoard:\n{}\n".format(board_move, self.board2d())
                 )
 
-
             # Game end conditions
-            
+
             if(self.board.check_for_five(move, color)):
                 if(color == BLACK):
                     self.game_status = "b"
@@ -352,7 +350,7 @@ class GtpConnection:
 
         except Exception as e:
             self.respond("Error: {}".format(str(e)))
-            
+
     def genmove_cmd(self, args):
         """ Modify this function for Assignment 1 """
         """ generate a move for color args[0] in {'b','w'} """
