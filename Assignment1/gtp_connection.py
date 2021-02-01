@@ -34,6 +34,8 @@ class GtpConnection:
         board: 
             Represents the current board state.
         """
+
+        self.game_status = "playing"
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
@@ -250,6 +252,11 @@ class GtpConnection:
             board_color = args[0].lower()
             board_move = args[1].lower()
 
+            # Check if Game has ended
+
+            if(self.game_status != "playing"):
+                return
+
 
             # Checking for Wrong Color
             if (board_color != 'b' and board_color != 'w'):
@@ -264,17 +271,14 @@ class GtpConnection:
             
 
             # Checking if wrong coordinate
-            if (ord(board_move[0]) - ord('a') > self.board.size or int(board_move[1:]) > self.board.size):
+            try:
+                # Convert Args from GTP format to a point as defined in the board class
+                coord = move_to_coord(args[1], self.board.size)
+            except (IndexError, ValueError):
                 self.error('illegal move: "{}" wrong coordinate'.format(args[1]))
                 return
-    
-            if color == BORDER:
-                self.error('illegal move: "{}" wrong coordinate'.format(args[1]))
-                return
+            
 
-
-            # Convert Args from GTP format to a point as defined in the board class
-            coord = move_to_coord(args[1], self.board.size)
             if coord:
                 move = coord_to_point(coord[0], coord[1], self.board.size)
             else:
