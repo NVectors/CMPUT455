@@ -286,7 +286,7 @@ class GtpConnection:
         """
         try:
 
-            if(len(self.board.get_empty_points()) == 0):
+            if(len(self.board.get_empty_points()) == 0 and self.game_status == "playing"):
                 self.game_status = "tied"
 
             board_color = args[0].lower()
