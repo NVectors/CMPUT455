@@ -361,6 +361,14 @@ class GtpConnection:
             self.respond('illegal move: "{}" wrong color'.format(board_color))
             return
 
+        # Convert the first char. of the color to correct integer code
+        color = color_to_int(board_color)
+
+        # Check if it's actually player turn
+        if(color != self.board.current_player):
+            self.error('illegal move "{}" wrong color'.format(args[0]))
+            return
+
         # Check if opponent has victory before making a move
         if self.game_status == "b" and board_color == "w":
             self.respond("resign")
@@ -369,14 +377,9 @@ class GtpConnection:
             self.respond("resign")
             return
 
-        # Convert the first char. of the color to correct integer code
-        color = color_to_int(board_color)
-        # Decide where to play(move) on the board
-        move = self.go_engine.get_move(self.board, color)
-        # Convert point to coordinate for the move
-        move_coord = point_to_coord(move, self.board.size)
-        # Convert coordinate to a readable label
-        move_as_string = format_point(move_coord).lower()
+        move = self.go_engine.get_move(self.board, color)       # Decide where to play(move) on the board
+        move_coord = point_to_coord(move, self.board.size)      # Convert point to coordinate for the move
+        move_as_string = format_point(move_coord).lower()       # Convert coordinate to a readable label
         # Move was returned as PASS (none) from board_util.py
         if (move == PASS):
             self.respond("pass")
@@ -389,11 +392,10 @@ class GtpConnection:
             if self.board.check_for_five(move, color):
                 # Game status is either "b" or "w"
                 self.game_status = board_color
-
-            if (not self.game_status == "b") or (not self.game_status == "w"):
-                # Board is filled and no winner
-                if not (self.board.get_empty_points):
-                    self.game_status = "tied"
+                
+            # Board is filled and no winner
+            if(len(self.board.get_empty_points()) == 0 and self.game_status == "playing"):
+                self.game_status = "tied"
 
             # Respond to user with the move coordinate as a label
             self.respond(move_as_string)
