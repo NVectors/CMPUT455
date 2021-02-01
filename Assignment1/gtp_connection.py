@@ -249,11 +249,16 @@ class GtpConnection:
         play a move args[1] for given color args[0] in {'b','w'}
         """
         try:
+
+            if(len(self.board.get_empty_points()) == 0):
+                self.game_status = "tied"
+            
+
             board_color = args[0].lower()
             board_move = args[1].lower()
 
             # Check if Game has ended
-
+           
             if(self.game_status != "playing"):
                 return
 
@@ -289,17 +294,27 @@ class GtpConnection:
 
             # Checking if Occupied
             if not self.board.play_move(move, color):
-                self.error('Illegal Move: "{}" occupied'.format(args[1]))
+                self.error('illegal move: "{}" occupied'.format(args[1]))
                 return
             else:
                 self.debug_msg(
                     "Move: {}\nBoard:\n{}\n".format(board_move, self.board2d())
                 )
+
+
+            # Game end conditions
+            
+            if(self.board.check_for_five(move, color)):
+                if(color == BLACK):
+                    self.game_status = "b"
+                elif(color == WHITE):
+                    self.game_status = "w"
+
             self.respond()
 
         except Exception as e:
             self.respond("Error: {}".format(str(e)))
-
+            
     def genmove_cmd(self, args):
         """ Modify this function for Assignment 1 """
         """ generate a move for color args[0] in {'b','w'} """
