@@ -32,6 +32,8 @@ class GtpConnection:
         board: 
             Represents the current board state.
         """
+
+        self.game_status = "playing"
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
@@ -282,26 +284,40 @@ class GtpConnection:
         play a move args[1] for given color args[0] in {'b','w'}
         """
         try:
+
+            if(len(self.board.get_empty_points()) == 0):
+                self.game_status = "tied"
+            
+
             board_color = args[0].lower()
 
-            if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
-                self.respond(
-                    'illegal move: "{}" wrong color'.format(board_color))
+            board_move = args[1].lower()
+
+            # Check if Game has ended
+           
+            if(self.game_status != "playing"):
                 return
 
-            board_move = args[1]
-            color = color_to_int(board_color)
-            if args[1].lower() == "pass":
-                self.board.play_move(PASS, color)
-                self.board.current_player = GoBoardUtil.opponent(color)
-                self.respond()
+
+            # Checking for Wrong Color
+            if (board_color != 'b' and board_color != 'w'):
+                self.error('illegall move "{}" wrong color'.format(args[0]))
                 return
+
+            color = color_to_int(board_color)
+
+            if(color != self.board.current_player):
+                self.error('illegall move "{}" wrong color'.format(args[0]))
+                return
+
+            # Checking if wrong coordinate
             try:
+                # Convert Args from GTP format to a point as defined in the board class
                 coord = move_to_coord(args[1], self.board.size)
             except (IndexError, ValueError):
-                self.respond('illegal move: "{}" wrong coordinate'.format(
-                    board_move.lower()))
+                self.error('illegal move: "{}" wrong coordinate'.format(args[1]))
                 return
+            
 
             if coord:
                 move = coord_to_point(coord[0], coord[1], self.board.size)
@@ -311,18 +327,32 @@ class GtpConnection:
                         move, args[1])
                 )
                 return
+
+            # Checking if Occupied
             if not self.board.play_move(move, color):
-                self.respond('illegal move: "{}" occupied'.format(
-                    board_move.lower()))
+
+                self.error('illegal move: "{}" occupied'.format(args[1]))
+                
                 return
             else:
                 self.debug_msg(
                     "Move: {}\nBoard:\n{}\n".format(board_move, self.board2d())
                 )
+
+
+            # Game end conditions
+            
+            if(self.board.check_for_five(move, color)):
+                if(color == BLACK):
+                    self.game_status = "b"
+                elif(color == WHITE):
+                    self.game_status = "w"
+
             self.respond()
+
         except Exception as e:
             self.respond("Error: {}".format(str(e)))
-
+            
     def genmove_cmd(self, args):
         """ Modify this function for Assignment 1 """
         """ generate a move for color args[0] in {'b','w'} """
