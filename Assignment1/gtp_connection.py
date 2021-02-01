@@ -225,10 +225,13 @@ class GtpConnection:
 
             for i in emptyPositions:
                 legalMoves.append(format_point(
-                    point_to_coord(i, self.board.size)))
+                    point_to_coord(i, self.board.size)).lower())
 
-        # Legal moves is only populated if game is in progress, else it is empty
-        self.respond(legalMoves)
+            legalMoves.sort(key=lambda x: x[0])
+            self.respond(legalMoves)
+
+        else:
+            self.respond()
         return
 
     def gogui_rules_side_to_move_cmd(self, args):
