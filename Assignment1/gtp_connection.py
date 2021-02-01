@@ -37,6 +37,7 @@ class GtpConnection:
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
+        self.game_status = "playing"    # Default game status 
         self.commands = {
             "protocol_version": self.protocol_version_cmd,
             "quit": self.quit_cmd,
@@ -174,6 +175,7 @@ class GtpConnection:
     def clear_board_cmd(self, args):
         """ clear the board """
         self.reset(self.board.size)
+        self.game_status = "playing"    #Reset game status
         self.respond()
 
     def boardsize_cmd(self, args):
@@ -209,8 +211,26 @@ class GtpConnection:
 
     def gogui_rules_legal_moves_cmd(self, args):
         """ Implement this function for Assignment 1 """
-        self.respond()
+
+        """ If the game is over, return an empty list. 
+        Otherwise, return a list of all empty points on the board in sorted order. 
+        """
+
+        legalMoves = []
+        # If game is ongoing: 
+        if (self.game_status == "playing"):
+            emptyPositions = self.board.get_empty_points()
+
+            # Not used, but defining anyway for now
+            player = self.board.current_player
+            
+            for i in emptyPositions:
+                legalMoves.append(format_point(point_to_coord(i, self.board.size)))
+        
+        # Legal moves is only populated if game is in progress, else it is empty
+        self.respond(legalMoves)
         return
+
 
     def gogui_rules_side_to_move_cmd(self, args):
         """ We already implemented this function for Assignment 1 """
@@ -239,7 +259,20 @@ class GtpConnection:
             
     def gogui_rules_final_result_cmd(self, args):
         """ Implement this function for Assignment 1 """
-        self.respond("unknown")
+        """
+        Three cases:
+            Five or more stones, there a winner black or white
+            Board is full, no legal moves left to play and no winner, it's a draw
+            Game has not ended yet
+        """
+        if (self.game_status == "b"):           # Player with black stones won the game
+            self.respond("black")
+        elif (self.game_status == "w"):         # Player with the white stones won the game
+            self.game_status("white")
+        elif (self.game_status == "tied"):      # Board is full, game over it is a draw
+            self.respond("draw")
+        elif (self.game_status == "playing"):   # Game in progress
+            self.respond("unknown")
 
     def play_cmd(self, args):
         """ Modify this function for Assignment 1 """
@@ -248,6 +281,11 @@ class GtpConnection:
         """
         try:
             board_color = args[0].lower()
+
+            if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
+                self.respond('illegal move: "{}" wrong color'.format(board_color))
+                return
+
             board_move = args[1]
             color = color_to_int(board_color)
             if args[1].lower() == "pass":
@@ -255,7 +293,12 @@ class GtpConnection:
                 self.board.current_player = GoBoardUtil.opponent(color)
                 self.respond()
                 return
-            coord = move_to_coord(args[1], self.board.size)
+            try:
+                coord = move_to_coord(args[1], self.board.size)
+            except (IndexError, ValueError):
+                self.respond('illegal move: "{}" wrong coordinate'.format(board_move.lower()))
+                return
+
             if coord:
                 move = coord_to_point(coord[0], coord[1], self.board.size)
             else:
@@ -264,7 +307,7 @@ class GtpConnection:
                 )
                 return
             if not self.board.play_move(move, color):
-                self.respond("Illegal Move: {}".format(board_move))
+                self.respond('illegal move: "{}" occupied'.format(board_move.lower()))
                 return
             else:
                 self.debug_msg(
@@ -277,16 +320,40 @@ class GtpConnection:
     def genmove_cmd(self, args):
         """ Modify this function for Assignment 1 """
         """ generate a move for color args[0] in {'b','w'} """
-        board_color = args[0].lower()
-        color = color_to_int(board_color)
-        move = self.go_engine.get_move(self.board, color)
-        move_coord = point_to_coord(move, self.board.size)
-        move_as_string = format_point(move_coord)
-        if self.board.is_legal(move, color):
-            self.board.play_move(move, color)
-            self.respond(move_as_string)
+
+        board_color = args[0].lower()                               # Get colour from argument 
+        if (not board_color == 'w' and not board_color == 'b'):     # Check if it is a valid argument
+            self.respond('illegal move: "{}" wrong color'.format(board_color))            
+            return
+
+        # Check if opponent has victory before making a move
+        if self.game_status == "b" and board_color == "w":
+            self.respond("resign")
+            return
+        elif self.game_status == "w" and board_color == "b":        
+            self.respond("resign")
+            return
+
+        color = color_to_int(board_color)                           # Convert the first char. of the color to correct integer code
+        move = self.go_engine.get_move(self.board, color)           # Decide where to play(move) on the board 
+        move_coord = point_to_coord(move, self.board.size)          # Convert point to coordinate for the move
+        move_as_string = format_point(move_coord).lower()           # Convert coordinate to a readable label
+        if (move == PASS):                                          # Move was returned as PASS (none) from board_util.py
+            self.respond("pass")
+        elif self.board.is_legal(move, color):                      # Check if the move is legal
+            self.board.play_move(move, color)                       # Make the move on the board
+
+            if self.board.check_for_five(move, color):              # Check if there a winner
+                self.game_status = board_color                      # Game status is either "b" or "w"
+
+            if (not self.game_status == "b") or (not self.game_status == "w"):
+                if  not (self.board.get_empty_points):              # Board is filled and no winner         
+                    self.game_status = "tied"                                                               
+
+            self.respond(move_as_string)                            # Respond to user with the move coordinate as a label
+            
         else:
-            self.respond("Illegal move: {}".format(move_as_string))
+            self.respond("illegal move: {}".format(move_as_string)) # Move was illegal 
 
     """
     ==========================================================================
@@ -352,7 +419,7 @@ def format_point(move):
     Return move coordinates as a string such as 'A1', or 'PASS'.
     """
     assert MAXSIZE <= 25
-    column_letters = "ABCDEFGHJKLMNOPQRSTUVWXYZ"
+    column_letters = "ABCDEFGHJKLMNOPQRSTUVWXYZ"  
     if move == PASS:
         return "PASS"
     row, col = move
@@ -385,7 +452,7 @@ def move_to_coord(point_str, board_size):
     except (IndexError, ValueError):
         raise ValueError("invalid point: '{}'".format(s))
     if not (col <= board_size and row <= board_size):
-        raise ValueError("point off board: '{}'".format(s))
+        raise ValueError("point off board: '{}'".format(s)) 
     return row, col
 
 
