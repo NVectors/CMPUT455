@@ -197,13 +197,15 @@ class GoBoard(object):
         Play a move of color on point
         Returns boolean: whether move was legal
         """
-        assert is_black_white(color), "Not a valid player of Black or White"
-        
-        # Check if point on board is already filled
-        if (self.board[point] != EMPTY):
+        assert is_black_white(color)
+        # Special cases
+        if self.board[point] != EMPTY:
             return False
 
         self.board[point] = color
+        self.current_player = GoBoardUtil.opponent(color)
+        self.last2_move = self.last_move
+        self.last_move = point
         return True
 
     def neighbors_of_color(self, point, color):
