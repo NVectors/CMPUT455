@@ -1,0 +1,430 @@
+#test 00, 10, ..., 100 are easy
+clear_board
+play B B4
+play W B3
+play B C4
+play W C3
+play B D4
+play W D3
+play B E4
+play W E3
+play B F4
+00 timelimit 1
+#?[]
+10 solve
+#?[b]
+
+clear_board
+play B A4
+play W A3
+play B B4
+play W B3
+play B C4
+play W C3
+play B E4
+play W E3
+play B F4
+play W F3
+play B G4
+play W G3
+play B D4
+20 solve
+#?[b]
+
+clear_board
+play B D4
+play W E4
+play B F4
+play W E3
+play B E5
+play W C3
+play B F5
+play W D5
+play B F3
+play W F2
+play B D6
+play W C7
+play B C6
+play W E6
+play B C4
+play W B5
+play B B4
+play W F6
+play B C2
+play W D2
+play B B2
+play W E2
+play B G2
+play W D1
+play B C1
+play W B6
+play B G7
+play W E7
+play B G4
+play W G3
+play B B3
+play W D3
+play B E1
+play W A6
+play B F1
+play W G6
+play B B1
+play W A3
+play B A4
+play W C5
+play B A5
+play W F7
+play B D7
+play W B7
+play B A7
+play W A1
+play B A2
+play W G1
+30 solve
+#?[draw G5]
+
+clear_board
+play B A7
+play W B7
+play B C7
+play W D7
+play B E7
+play W F7
+play B G7
+play W G6
+play B F6
+play W E6
+play B D6
+play W C6
+play B B6
+play W A6
+play B A5
+play W B5
+play B C5
+play W D5
+play B E5
+play W F5
+play B G5
+play W G4
+play B F4
+play W E4
+play B D4
+play W C4
+play B B4
+play W A4
+play B A2
+play W B2
+play B C2
+play W D2
+play B E2
+play W F2
+play B G2
+play W G1
+play B F1
+play W E1
+play B D1
+play W C1
+play B B1
+play W A1
+play B F3
+play W G3
+play B D3
+play W E3
+play B B3
+play W C3
+40 solve
+#?[b A3]
+50 genmove b
+#?[A3]
+
+clear_board
+play B D4
+play W E4
+play B F4
+play W E3
+play B E5
+play W C3
+play B F5
+play W D5
+play B F3
+play W F2
+play B D6
+play W C7
+play B C6
+play W E6
+play B C4
+play W B5
+play B B4
+play W F6
+play B C2
+play W D2
+play B B2
+play W E2
+play B G2
+play W D1
+play B C1
+play W B6
+play B G7
+play W E7
+play B G4
+play W G3
+play B B3
+play W D3
+play B E1
+play W A6
+play B F1
+play W G6
+play B B1
+play W A3
+play B A4
+play W C5
+play B A5
+play W F7
+play B D7
+play W B7
+play B A7
+play W A1
+play B A2
+60 solve
+#?[draw G1|draw G5]
+
+clear_board
+play B A7
+play W B7
+play B C7
+play W D7
+play B E7
+play W F7
+play B G7
+play W G6
+play B F6
+play W E6
+play B D6
+play W C6
+play B B6
+play W A6
+play B A5
+play W B5
+play B C5
+play W D5
+play B E5
+play W F5
+play B G5
+play W G4
+play B F4
+play W E4
+play B D4
+play W C4
+play B B4
+play W A4
+play B A2
+play W B2
+play B C2
+play W D2
+play B E2
+play W F2
+play B G2
+play W G1
+play B F1
+play W E1
+play B D1
+play W C1
+play B B1
+play W A1
+play B B3
+play W A3
+play B D3
+play W C3
+play B F3
+70 solve
+#?[b]
+
+clear_board
+play B A7
+play W B7
+play B C7
+play W D7
+play B E7
+play W F7
+play B G7
+play W G6
+play B F6
+play W E6
+play B D6
+play W C6
+play B B6
+play W A6
+play B A5
+play W B5
+play B C5
+play W D5
+play B E5
+play W F5
+play B G5
+play W G4
+play B F4
+play W E4
+play B D4
+play W C4
+play B B4
+play W A4
+play B B3
+play W A3
+play B D3
+play W C3
+play B F3
+play W E3
+play B A2
+play W B2
+play B A1
+play W B1
+play B C2
+play W D2
+play B C1
+play W D1
+play B E2
+play W F2
+play B E1
+play W F1
+play B G1
+80 solve
+#?[draw G3]
+
+clear_board
+play B A7
+play W B7
+play B C7
+play W D7
+play B E7
+play W F7
+play B G7
+play W G6
+play B F6
+play W E6
+play B D6
+play W C6
+play B B6
+play W A6
+play B A5
+play W B5
+play B C5
+play W D5
+play B E5
+play W F5
+play B G5
+play W G4
+play B F4
+play W E4
+play B D4
+play W C4
+play B B4
+play W A4
+play B F1
+play W A3
+play B E1
+play W C3
+play B D1
+play W E3
+play B B3
+play W G3
+play B F3
+play W A1
+play B D3
+play W D2
+play B C2
+play W B2
+play B A2
+play W F2
+play B E2
+play W G2
+90 solve
+#?[b C1]
+100 genmove b
+#?[C1]
+
+#test 110, 120, .., 150 are medium
+timelimit 5
+clear_board
+play B C4
+play W C3
+play B D4
+play W D3
+play B E4
+play W E3
+play B F4
+110 solve
+#?[b]
+play W F3
+play B A1
+120 solve
+#?[w B3|w G3]
+130 genmove w
+#?[B3|G3]
+
+clear_board
+play B A5
+play W D5
+play B A4
+play W D4
+play B A3
+play W D3
+play B G5
+play W A7
+play B G4
+play W G7
+play B G3
+140 solve
+#?[w D2|w D6]
+150 genmove w
+#?[D2|D6]
+
+#test 160, 170, ..., 200 are hard
+timelimit 5
+boardsize 5
+160 solve
+#?[unknown]
+
+timelimit 30
+boardsize 9
+170 solve
+#?[unknown]
+
+timelimit 30
+boardsize 7
+play B C3
+play W A2
+play B C4
+play W G6
+play B D4
+play W A4
+play B E3
+play W G7
+180 solve
+#?[b C5]
+
+timelimit 60
+boardsize 7
+play B C3
+play W A1
+play B C4
+play W G6
+play B D4
+play W A4
+play B E3
+play W G7
+190 solve
+#?[b C5]
+
+timelimit 30
+boardsize 7
+play B C3
+play W A2
+play B C4
+play W G6
+play B D4
+play W A4
+play B E3
+play W G2
+200 solve
+#?[b C5]
+
