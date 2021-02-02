@@ -348,9 +348,9 @@ class GtpConnection:
         color = color_to_int(board_color)
 
         # Check if it's actually player turn
-        if(color != self.board.current_player):
-            self.error('illegal move "{}" wrong color'.format(args[0]))
-            return
+        #if(color != self.board.current_player):
+        #    self.error('illegal move "{}" wrong color'.format(args[0]))
+        #    return
 
         # Check if opponent has victory before making a move
         if self.game_status == "b" and board_color == "w":
