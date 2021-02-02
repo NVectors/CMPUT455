@@ -303,7 +303,7 @@ class GtpConnection:
                 # Convert Args from GTP format to a point as defined in the board class
                 coord = move_to_coord(args[1], self.board.size)
             except (IndexError, ValueError):
-                self.respond('illegal move: "{}" wrong coordinate'.format(args[1]))
+                self.respond('illegal move: "{}" wrong coordinate'.format(board_move))
                 return
 
             if coord:
