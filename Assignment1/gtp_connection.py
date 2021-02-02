@@ -290,7 +290,7 @@ class GtpConnection:
 
             # Checking for Wrong Color
             if (board_color != 'b' and board_color != 'w'):
-                self.error('illegal move "{}" wrong color'.format(args[0]))
+                self.respond('illegal move "{}" wrong color'.format(args[0]))
                 return
 
             color = color_to_int(board_color)
@@ -314,7 +314,7 @@ class GtpConnection:
 
             # Checking if Occupied
             if not self.board.play_move(move, color):
-                self.error('illegal move: "{}" occupied'.format(args[1]))
+                self.respond('illegal move: "{}" occupied'.format(args[1]))
                 return
             else:
                 self.debug_msg(
