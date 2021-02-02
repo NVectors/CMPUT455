@@ -290,7 +290,7 @@ class GtpConnection:
 
             # Checking for Wrong Color
             if (board_color != 'b' and board_color != 'w'):
-                self.respond('illegal move "{}" wrong color'.format(board_color))
+                self.respond('illegal move: "{}" wrong color'.format(board_color))
                 return
 
             color = color_to_int(board_color)
