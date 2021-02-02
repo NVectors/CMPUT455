@@ -290,13 +290,13 @@ class GtpConnection:
 
             # Checking for Wrong Color
             if (board_color != 'b' and board_color != 'w'):
-                self.error('illegall move "{}" wrong color'.format(args[0]))
+                self.error('illegal move "{}" wrong color'.format(args[0]))
                 return
 
             color = color_to_int(board_color)
-            if(color != self.board.current_player):
-                self.error('illegall move "{}" wrong color'.format(args[0]))
-                return
+            #if(color != self.board.current_player):
+            #    self.error('illegal move "{}" wrong color'.format(args[0]))
+            #    return
 
             # Checking if wrong coordinate
             try:
