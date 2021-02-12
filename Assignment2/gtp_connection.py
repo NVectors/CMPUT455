@@ -21,6 +21,7 @@ from board_util import (
 import numpy as np
 import re
 
+TIME_LIMIT = 1  #Default time is set to 1 second
 
 class GtpConnection:
     def __init__(self, go_engine, board, debug_mode=False):
@@ -276,9 +277,15 @@ class GtpConnection:
     """ Start of Assignment 2 Code """
 
     def time_limit_cmd(self, args):
-        self.respond("Need to implement time_limit cmd")
-
-    
+        global TIME_LIMIT   #Global for genmove_cmd or solve_cmd to access
+        try:
+            seconds = int(args[0])
+            if (seconds > 0 and seconds < 101):
+                TIME_LIMIT = seconds
+            else:
+                self.respond("Has to be between 1 or 100 seconds")
+        except IndexError:
+            self.respond("Error!")
 
     """ End of Assignment 2 Code """
 
