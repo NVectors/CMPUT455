@@ -57,7 +57,8 @@ class GtpConnection:
             "gogui-rules_side_to_move": self.gogui_rules_side_to_move_cmd,
             "gogui-rules_board": self.gogui_rules_board_cmd,
             "gogui-rules_final_result": self.gogui_rules_final_result_cmd,
-            "gogui-analyze_commands": self.gogui_analyze_cmd
+            "gogui-analyze_commands": self.gogui_analyze_cmd,
+            "timelimit": self.time_limit_cmd
         }
 
         # used for argument checking
@@ -271,6 +272,15 @@ class GtpConnection:
             self.respond(move_as_string.lower())
         else:
             self.respond("Illegal move: {}".format(move_as_string))
+
+    """ Start of Assignment 2 Code """
+
+    def time_limit_cmd(self, args):
+        self.respond("Need to implement time_limit cmd")
+
+    
+
+    """ End of Assignment 2 Code """
 
     def gogui_rules_game_id_cmd(self, args):
         self.respond("Gomoku")
