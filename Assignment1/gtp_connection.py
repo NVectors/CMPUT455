@@ -285,66 +285,49 @@ class GtpConnection:
         play a move args[1] for given color args[0] in {'b','w'}
         """
         try:
-
-            if(len(self.board.get_empty_points()) == 0 and self.game_status == "playing"):
-                self.game_status = "tied"
-
             board_color = args[0].lower()
-
             board_move = args[1].lower()
-
-            # Check if Game has ended
-
-            if(self.game_status != "playing"):
-                return
 
             # Checking for Wrong Color
             if (board_color != 'b' and board_color != 'w'):
-                self.error('illegall move "{}" wrong color'.format(args[0]))
+                self.respond('illegal move: "{}" wrong color'.format(board_color))
                 return
 
             color = color_to_int(board_color)
-
-            if(color != self.board.current_player):
-                self.error('illegall move "{}" wrong color'.format(args[0]))
-                return
+            #if(color != self.board.current_player):
+            #    self.error('illegal move "{}" wrong color'.format(args[0]))
+            #    return
 
             # Checking if wrong coordinate
             try:
                 # Convert Args from GTP format to a point as defined in the board class
                 coord = move_to_coord(args[1], self.board.size)
             except (IndexError, ValueError):
-                self.error(
-                    'illegal move: "{}" wrong coordinate'.format(args[1]))
+                self.respond('illegal move: "{}" wrong coordinate'.format(board_move))
                 return
 
             if coord:
                 move = coord_to_point(coord[0], coord[1], self.board.size)
             else:
-                self.error(
-                    "Error executing move {} converted from {}".format(
-                        move, args[1])
-                )
+                self.error("Error executing move {} converted from {}".format(move, args[1]))
                 return
 
             # Checking if Occupied
             if not self.board.play_move(move, color):
-
-                self.error('illegal move: "{}" occupied'.format(args[1]))
-
+                self.respond('illegal move: "{}" occupied'.format(args[1]))
                 return
             else:
                 self.debug_msg(
                     "Move: {}\nBoard:\n{}\n".format(board_move, self.board2d())
                 )
+            
+            #Check for a tie
+            if(len(self.board.get_empty_points()) == 0 and self.game_status == "playing"):
+                self.game_status = "tied"
 
             # Game end conditions
-
             if(self.board.check_for_five(move, color)):
-                if(color == BLACK):
-                    self.game_status = "b"
-                elif(color == WHITE):
-                    self.game_status = "w"
+                self.game_status = board_color
 
             self.respond()
 
@@ -365,9 +348,9 @@ class GtpConnection:
         color = color_to_int(board_color)
 
         # Check if it's actually player turn
-        if(color != self.board.current_player):
-            self.error('illegal move "{}" wrong color'.format(args[0]))
-            return
+        #if(color != self.board.current_player):
+        #    self.error('illegal move "{}" wrong color'.format(args[0]))
+        #    return
 
         # Check if opponent has victory before making a move
         if self.game_status == "b" and board_color == "w":
