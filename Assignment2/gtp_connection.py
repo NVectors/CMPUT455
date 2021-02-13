@@ -298,6 +298,7 @@ class GtpConnection:
                 TIME_LIMIT = seconds
             else:
                 self.respond("Time limit must be between 1 - 100 seconds")
+            self.respond("")
         except IndexError:
             self.respond("Error!")
 
