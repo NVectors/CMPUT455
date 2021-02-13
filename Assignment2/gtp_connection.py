@@ -20,7 +20,9 @@ from board_util import (
 )
 import numpy as np
 import re
+import time
 
+TIME_LIMIT = 1  #Default time is set to 1 second
 
 class GtpConnection:
     def __init__(self, go_engine, board, debug_mode=False):
@@ -57,7 +59,9 @@ class GtpConnection:
             "gogui-rules_side_to_move": self.gogui_rules_side_to_move_cmd,
             "gogui-rules_board": self.gogui_rules_board_cmd,
             "gogui-rules_final_result": self.gogui_rules_final_result_cmd,
-            "gogui-analyze_commands": self.gogui_analyze_cmd
+            "gogui-analyze_commands": self.gogui_analyze_cmd,
+            "timelimit": self.time_limit_cmd,
+            "solve": self.solve_cmd 
         }
 
         # used for argument checking
@@ -254,6 +258,11 @@ class GtpConnection:
         """
         Generate a move for the color args[0] in {'b', 'w'}, for the game of gomoku.
         """
+
+        board_color = args[0].lower()
+        color = color_to_int(board_color)
+        
+        # Check for winner
         result = self.board.detect_five_in_a_row()
         if result == GoBoardUtil.opponent(self.board.current_player):
             self.respond("resign")
@@ -261,9 +270,16 @@ class GtpConnection:
         if self.board.get_empty_points().size == 0:
             self.respond("pass")
             return
-        board_color = args[0].lower()
-        color = color_to_int(board_color)
-        move = self.go_engine.get_move(self.board, color)
+
+        board_copy = self.board.copy                    # Make a copy of the current board state
+        toPlay, move = Minimax(board_copy, 1, color)    # Minimax(board, depth, player)
+        # Not solved within time limit or we're losing, play random
+        if not toPlay:
+            move = self.go_engine.get_move(self.board, color)
+
+        if move == PASS:
+            self.respond("pass")
+            return
         move_coord = point_to_coord(move, self.board.size)
         move_as_string = format_point(move_coord)
         if self.board.is_legal(move, color):
@@ -271,6 +287,26 @@ class GtpConnection:
             self.respond(move_as_string.lower())
         else:
             self.respond("Illegal move: {}".format(move_as_string))
+
+    """ Start of Assignment 2 Code inside Class """
+
+    def time_limit_cmd(self, args):
+        global TIME_LIMIT   #Global for genmove_cmd or solve_cmd to access
+        try:
+            seconds = int(args[0])
+            if (seconds > 0 and seconds < 101):
+                TIME_LIMIT = seconds
+            else:
+                self.respond("Time limit must be between 1 - 100 seconds")
+            self.respond("")
+        except IndexError:
+            self.respond("Error!")
+
+
+    def solve_cmd(self, args):
+        self.respond("")
+
+    """ End of Assignment 2 Code  inside Class"""
 
     def gogui_rules_game_id_cmd(self, args):
         self.respond("Gomoku")
@@ -401,3 +437,23 @@ def color_to_int(c):
         return color_to_int[c]
     except:
         raise KeyError("\"{}\" wrong color".format(c))
+
+""" Start of Assignment 2 Code outside Class """
+
+def Minimax(board, depth, color):
+    time_start = time.time()
+    toPlay = 0
+    alpha =  np.inf 
+    beta = -np.inf 
+    best_move = None
+    best_point = 0
+    moves = GtpConnection.gogui_rules_legal_moves_cmd
+
+    return toPlay, best_move
+
+
+def max():
+    return 0
+
+def min():
+    return 0
