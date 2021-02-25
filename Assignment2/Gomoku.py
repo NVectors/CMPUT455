@@ -9,9 +9,6 @@ from endgamesolver import GomokuSolver
 import signal
 import numpy as np
 
-class TimeoutException(Exception):
-    pass
-
 
 class Gomoku():
     def __init__(self):
