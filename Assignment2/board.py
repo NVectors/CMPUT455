@@ -351,3 +351,7 @@ class GoBoard(object):
             if counter == 5 and prev != EMPTY:
                 return prev
         return EMPTY
+
+    def undo_move(self, move):
+        self.board[move] = EMPTY
+        self.current_player = GoBoardUtil.opponent(self.current_player)

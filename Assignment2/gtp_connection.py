@@ -21,11 +21,12 @@ from board_util import (
 import numpy as np
 import re
 import time
+from endgamesolver import GomokuSolver
 
 TIME_LIMIT = 1  #Default time is set to 1 second
 
 class GtpConnection:
-    def __init__(self, go_engine, board, debug_mode=False):
+    def __init__(self, go_engine, board, Solver, debug_mode=False):
         """
         Manage a GTP connection for a Go-playing engine
 
@@ -36,6 +37,7 @@ class GtpConnection:
         board: 
             Represents the current board state.
         """
+        self.Solver = Solver
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
@@ -271,10 +273,9 @@ class GtpConnection:
             self.respond("pass")
             return
 
-        board_copy = self.board.copy                    # Make a copy of the current board state
-        toPlay, move = Minimax(board_copy, 1, color)    # Minimax(board, depth, player)
+        result, move = self.Solver.solve(self.board, TIME_LIMIT)    # Minimax(board, depth, player)
         # Not solved within time limit or we're losing, play random
-        if not toPlay:
+        if result == "unkown":
             move = self.go_engine.get_move(self.board, color)
 
         if move == PASS:
@@ -284,7 +285,7 @@ class GtpConnection:
         move_as_string = format_point(move_coord)
         if self.board.is_legal(move, color):
             self.board.play_move(move, color)
-            self.respond(move_as_string.lower())
+            self.respond(move_as_string.upper())
         else:
             self.respond("Illegal move: {}".format(move_as_string))
 
@@ -304,8 +305,15 @@ class GtpConnection:
 
 
     def solve_cmd(self, args):
-        self.respond("")
+        # TODO: Hashing and Transposition Table
+        result, move = self.Solver.solve(self.board, TIME_LIMIT)
 
+        if(move):
+            move = format_point(point_to_coord(move, self.board.size))
+            self.respond(result + " " + move)
+        else:
+            self.respond(result)
+            
     """ End of Assignment 2 Code  inside Class"""
 
     def gogui_rules_game_id_cmd(self, args):
@@ -439,6 +447,7 @@ def color_to_int(c):
         raise KeyError("\"{}\" wrong color".format(c))
 
 """ Start of Assignment 2 Code outside Class """
+"""
 
 def Minimax(board, depth, color):
     time_start = time.time()
@@ -450,6 +459,7 @@ def Minimax(board, depth, color):
     moves = GtpConnection.gogui_rules_legal_moves_cmd
 
     return toPlay, best_move
+"""
 
 
 def max():
