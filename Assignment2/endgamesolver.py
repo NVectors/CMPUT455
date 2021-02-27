@@ -34,9 +34,8 @@ class GomokuSolver:
         raise Exception
 
     def call_search(self, board):
-        tt = TranspositionTable() # use separate table for each color
-        return self.minimax(board, -1 * self.infinity, self.infinity, tt) # Get the score and best move
-
+        tt = TranspositionTable()                                           # Use separate table for each color
+        return self.minimax(board, -1 * self.infinity, self.infinity, tt)   # Get the score and best move
 
     def solve(self, board, time):
         # Set alarm
@@ -75,15 +74,17 @@ class GomokuSolver:
             return self.storeResult(self.evaluate_score_endgame(board,outcome), None)
 
         # Order moves by heuristic
-        moves = board.get_empty_points()
-        self.board = board
+        #moves = board.get_empty_points()
+        #self.board = board
 
         #TODO: Right now timeouts while calculating best move using Heuristic
         #moves = sorted(moves, key = self.evaluate_move_heuristic, reverse = True)
 
         # Choose best move
-        best = moves[0]
+        #best = moves[0]
 
+        moves = board.get_empty_points()
+        best = moves[0]
         for m in moves:
             board.play_move(m, board.current_player)
             value, _ = self.minimax(board, -beta, -alpha, tt)
@@ -92,7 +93,7 @@ class GomokuSolver:
                 alpha = value
                 best = m
             board.undo_move(m)
-            if value >= beta:
+            if value >= beta: 
                 #result = beta, m
                 #return result
                 return self.storeResult(beta, m)
