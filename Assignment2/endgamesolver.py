@@ -36,16 +36,16 @@ class GomokuSolver:
         finally:
             signal.alarm(0)
 
-    def minimax(self, state, alpha, beta):
-        outcome =  state.detect_five_in_a_row()
+    def minimax(self, board, alpha, beta):
+        outcome =  board.detect_five_in_a_row()
 
-        # Check if terminal state
-        if (state.get_empty_points().size == 0 or outcome):
-            return self.evaluate_score_endgame(state, outcome), None
+        # Check if terminal board
+        if (board.get_empty_points().size == 0 or outcome):
+            return self.evaluate_score_endgame(board, outcome), None
 
         # Order moves by heuristic
-        moves = state.get_empty_points()
-        self.state = state
+        moves = board.get_empty_points()
+        self.board = board
 
         #TODO: Right now timeouts while calculating best move using Heuristic
         #moves = sorted(moves, key = self.evaluate_move_heuristic, reverse = True)
@@ -54,13 +54,13 @@ class GomokuSolver:
         best = moves[0]
 
         for m in moves:
-            state.play_move(m, state.current_player)
-            value, _ = self.minimax(state, -beta, -alpha)
+            board.play_move(m, board.current_player)
+            value, _ = self.minimax(board, -beta, -alpha)
             value = -value
             if value > alpha:
                 alpha = value
                 best = m
-            state.undo_move(m)
+            board.undo_move(m)
             if value >= beta:
                 result = beta, m
                 return result
@@ -68,16 +68,16 @@ class GomokuSolver:
         result = alpha, best
         return result
 
-    def evaluate_score_endgame(self, state, outcome):
+    def evaluate_score_endgame(self, board, outcome):
         if(outcome):
             return self.infinity * -1
         else:
             return 0
     
     def evaluate_move_heuristic(self, move):
-        self.state.play_move(m, self.state.current_player)
+        self.board.play_move(m, self.board.current_player)
         score = -self.evaluate_state_heuristic()
-        self.state.undo_move(m)
+        self.board.undo_move(m)
         return score
     
     def evaluate_state_heuristic(self):
@@ -101,7 +101,7 @@ class GomokuSolver:
         countEmpty = 0
 
         for stone in line:
-            stoneColor = self.state.board[stone]
+            stoneColor = self.board.board[stone]
 
             if stoneColor == 1:
                 countBlack += 1
@@ -110,7 +110,7 @@ class GomokuSolver:
             else:
                 countEmpty += 1
 
-        if(self.state.current_player == 1):
+        if(self.board.current_player == 1):
             myCount = countBlack
             oppCount = countWhite
         else:
