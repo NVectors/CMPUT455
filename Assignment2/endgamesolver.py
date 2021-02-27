@@ -3,6 +3,25 @@ from board_util import GoBoardUtil
 from board import GoBoard
 import numpy as np
 
+class TranspositionTable(object):
+# Written by Martin Mueller
+# Table is stored in a dictionary, with board code as key, 
+# and minimax score as the value
+
+    # Empty dictionary
+    def __init__(self):
+        self.table = {}
+
+    # Used to print the whole table with print(tt)
+    def __repr__(self):
+        return self.table.__repr__()
+        
+    def store(self, code, score):
+        self.table[code] = score
+    
+    # Python dictionary returns 'None' if key not found by get()
+    def lookup(self, code):
+        return self.table.get(code)
 
 class GomokuSolver:
     def __init__(self):
@@ -15,8 +34,8 @@ class GomokuSolver:
         raise Exception
 
     def call_search(self, board):
-        #tt = TranspositionTable() # use separate table for each color
-        return self.minimax(board, -1 * self.infinity, self.infinity) # Get the score and best move
+        tt = TranspositionTable() # use separate table for each color
+        return self.minimax(board, -1 * self.infinity, self.infinity, tt) # Get the score and best move
 
 
     def solve(self, board, time):
@@ -47,7 +66,7 @@ class GomokuSolver:
         result = score, win_move
         return result
 
-    def minimax(self, board, alpha, beta):
+    def minimax(self, board, alpha, beta, tt):
         outcome =  board.detect_five_in_a_row()
 
         # Check if terminal board
@@ -67,7 +86,7 @@ class GomokuSolver:
 
         for m in moves:
             board.play_move(m, board.current_player)
-            value, _ = self.minimax(board, -beta, -alpha)
+            value, _ = self.minimax(board, -beta, -alpha, tt)
             value = -value
             if value > alpha:
                 alpha = value
