@@ -36,13 +36,18 @@ class GomokuSolver:
         finally:
             signal.alarm(0)
 
+    def storeResult(self, score, win_move):
+        #tt.store(state.code(), result)
+        result = score, win_move
+        return result
+
     def minimax(self, board, alpha, beta):
         outcome =  board.detect_five_in_a_row()
 
         # Check if terminal board
         if (board.get_empty_points().size == 0 or outcome):
-            return self.evaluate_score_endgame(board, outcome), None
-
+            #return self.evaluate_score_endgame(board, outcome), None
+            return self.storeResult(self.evaluate_score_endgame(board,outcome), None)
         # Order moves by heuristic
         moves = board.get_empty_points()
         self.board = board
@@ -62,11 +67,13 @@ class GomokuSolver:
                 best = m
             board.undo_move(m)
             if value >= beta:
-                result = beta, m
-                return result
+                #result = beta, m
+                #return result
+                return self.storeResult(beta, m)
 
-        result = alpha, best
-        return result
+        #result = alpha, best
+        #return result
+        return self.storeResult(alpha, best)
 
     def evaluate_score_endgame(self, board, outcome):
         if(outcome):
