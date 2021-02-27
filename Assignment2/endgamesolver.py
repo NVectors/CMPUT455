@@ -14,13 +14,19 @@ class GomokuSolver:
     def handler(self, signum, frame):
         raise Exception
 
+    def call_search(self, board):
+        #tt = TranspositionTable() # use separate table for each color
+        return self.minimax(board, -1 * self.infinity, self.infinity) # Get the score and best move
+
+
     def solve(self, board, time):
         # Set alarm
         signal.alarm(time)
         boardCopy = board.copy()
         try:
-            score, move = self.minimax(boardCopy, -1 * self.infinity, self.infinity) # Get the score and best move
-
+            #score, move = self.minimax(boardCopy, -1 * self.infinity, self.infinity) # Get the score and best move
+            score, move = self.call_search(boardCopy)
+            
             if(score == 0):
                 return "draw", move
             elif(score > 0):
@@ -48,6 +54,7 @@ class GomokuSolver:
         if (board.get_empty_points().size == 0 or outcome):
             #return self.evaluate_score_endgame(board, outcome), None
             return self.storeResult(self.evaluate_score_endgame(board,outcome), None)
+
         # Order moves by heuristic
         moves = board.get_empty_points()
         self.board = board
