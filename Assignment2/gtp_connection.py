@@ -21,11 +21,12 @@ from board_util import (
 import numpy as np
 import re
 import time
+from endgamesolver import GomokuSolver, TranspositionTable, ZobristHasher
 
 TIME_LIMIT = 1  #Default time is set to 1 second
 
 class GtpConnection:
-    def __init__(self, go_engine, board, debug_mode=False):
+    def __init__(self, go_engine, board, Solver, debug_mode=False):
         """
         Manage a GTP connection for a Go-playing engine
 
@@ -36,9 +37,14 @@ class GtpConnection:
         board: 
             Represents the current board state.
         """
+        self.Solver = Solver
+        self.ttBlack = TranspositionTable()
+        self.ttWhite = TranspositionTable()
+        self.tt = [self.ttBlack, self.ttWhite]
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
+        self.hasher = ZobristHasher(self.board.size)
         self.commands = {
             "protocol_version": self.protocol_version_cmd,
             "quit": self.quit_cmd,
@@ -154,6 +160,10 @@ class GtpConnection:
         Reset the board to empty board of given size
         """
         self.board.reset(size)
+        self.hasher = ZobristHasher(size)
+        self.ttBlack = TranspositionTable()
+        self.ttWhite = TranspositionTable()
+        self.tt = [self.ttBlack, self.ttWhite]
 
     def board2d(self):
         return str(GoBoardUtil.get_twoD_board(self.board))
@@ -263,28 +273,16 @@ class GtpConnection:
         color = color_to_int(board_color)
         
         # Check for winner
-        result = self.board.detect_five_in_a_row()
-        if result == GoBoardUtil.opponent(self.board.current_player):
-            self.respond("resign")
-            return
-        if self.board.get_empty_points().size == 0:
-            self.respond("pass")
-            return
-
-        board_copy = self.board.copy                    # Make a copy of the current board state
-        toPlay, move = Minimax(board_copy, 1, color)    # Minimax(board, depth, player)
+     
+        result, move = self.Solver.solve(self.board, TIME_LIMIT, self.tt, self.hasher)    # Minimax(board, depth, player)
         # Not solved within time limit or we're losing, play random
-        if not toPlay:
+        if result == "unknown":
             move = self.go_engine.get_move(self.board, color)
 
-        if move == PASS:
-            self.respond("pass")
-            return
         move_coord = point_to_coord(move, self.board.size)
         move_as_string = format_point(move_coord)
         if self.board.is_legal(move, color):
-            self.board.play_move(move, color)
-            self.respond(move_as_string.lower())
+            self.respond(move_as_string.upper())
         else:
             self.respond("Illegal move: {}".format(move_as_string))
 
@@ -304,8 +302,15 @@ class GtpConnection:
 
 
     def solve_cmd(self, args):
-        self.respond("")
+        # TODO: Hashing and Transposition Table
+        result, move = self.Solver.solve(self.board, TIME_LIMIT, self.tt, self.hasher)
 
+        if(move):
+            move = format_point(point_to_coord(move, self.board.size))
+            self.respond(result + " " + move)
+        else:
+            self.respond(result)
+            
     """ End of Assignment 2 Code  inside Class"""
 
     def gogui_rules_game_id_cmd(self, args):
@@ -439,6 +444,7 @@ def color_to_int(c):
         raise KeyError("\"{}\" wrong color".format(c))
 
 """ Start of Assignment 2 Code outside Class """
+"""
 
 def Minimax(board, depth, color):
     time_start = time.time()
@@ -450,6 +456,7 @@ def Minimax(board, depth, color):
     moves = GtpConnection.gogui_rules_legal_moves_cmd
 
     return toPlay, best_move
+"""
 
 
 def max():

@@ -1,10 +1,13 @@
-#!/usr/local/bin/python3
+#!/usr/bin/python3
 # /usr/bin/python3
 # Set the path to your python3 above
 
 from gtp_connection import GtpConnection
 from board_util import GoBoardUtil
 from board import GoBoard
+from endgamesolver import GomokuSolver, TranspositionTable, ZobristHasher
+import signal
+import numpy as np
 
 
 class Gomoku():
@@ -32,7 +35,9 @@ def run():
     start the gtp connection and wait for commands.
     """
     board = GoBoard(7)
-    con = GtpConnection(Gomoku(), board)
+    Solver = GomokuSolver()
+    
+    con = GtpConnection(Gomoku(), board, Solver)
     con.start_connection()
 
 
