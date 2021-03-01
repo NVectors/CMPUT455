@@ -5,7 +5,7 @@
 from gtp_connection import GtpConnection
 from board_util import GoBoardUtil
 from board import GoBoard
-from endgamesolver import GomokuSolver
+from endgamesolver import GomokuSolver, TranspositionTable, ZobristHasher
 import signal
 import numpy as np
 
@@ -36,6 +36,7 @@ def run():
     """
     board = GoBoard(7)
     Solver = GomokuSolver()
+    
     con = GtpConnection(Gomoku(), board, Solver)
     con.start_connection()
 

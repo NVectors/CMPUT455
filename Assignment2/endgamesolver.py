@@ -2,6 +2,24 @@ import signal
 from board_util import GoBoardUtil
 from board import GoBoard
 import numpy as np
+import random
+
+class ZobristHasher:
+
+    def __init__(self, boardSize):
+        self.zobristArray = []
+        self.boardIndices = boardSize*boardSize
+
+        for _ in range(self.boardIndices):
+            self.zobristArray.append([random.getrandbits(64) for _ in range(3)])
+
+    def hash(self, board):
+        hashCode = self.zobristArray[0][board[0]]
+        for i in range(1,self.boardIndices):
+            hashCode = hashCode ^ self.zobristArray[i][board[i]]
+        
+        return hashCode
+
 
 class TranspositionTable(object):
 # Written by Martin Mueller
@@ -23,84 +41,107 @@ class TranspositionTable(object):
     def lookup(self, code):
         return self.table.get(code)
 
+
 class GomokuSolver:
     def __init__(self):
         self.int_to_color = {1:"b", 2:"w"}
         self.infinity = 10000
         self.weights = [0, 2, 8, 16, 64, 10000]
         signal.signal(signal.SIGALRM, self.handler)
+        
 
     def handler(self, signum, frame):
-        raise Exception
+        raise TimeoutError
 
-    def call_search(self, board):
-        tt = TranspositionTable()                                           # Use separate table for each color
-        return self.minimax(board, -1 * self.infinity, self.infinity, tt)   # Get the score and best move
-
-    def solve(self, board, time):
+    def solve(self, board, time, tt, hasher):
         # Set alarm
         signal.alarm(time)
         boardCopy = board.copy()
+        ttBlack, ttWhite = tt
+
         try:
-            #score, move = self.minimax(boardCopy, -1 * self.infinity, self.infinity) # Get the score and best move
-            score, move = self.call_search(boardCopy)
             
+            score, move = self.minimax(boardCopy, -1 * self.infinity, self.infinity, ttBlack, ttWhite, hasher) # Get the score and best move
+    
             if(score == 0):
                 return "draw", move
             elif(score > 0):
+
                 win = board.current_player
                 return self.int_to_color[win], move
             else:
                 win = GoBoardUtil.opponent(board.current_player)
                 return self.int_to_color[win], None
 
-        except Exception:
+        except TimeoutError:
             return "unknown", None
 
         finally:
             signal.alarm(0)
 
-    def storeResult(self, score, win_move):
-        #tt.store(state.code(), result)
-        result = score, win_move
-        return result
+    def storeResult(self, result, tt, hashCode):
+        tt.store(hashCode, result)
 
-    def minimax(self, board, alpha, beta, tt):
+    def minimax(self, board, alpha, beta, ttBlack, ttWhite, hasher):
+
+        if(board.current_player == 1):
+            tt = ttBlack
+        else:
+            tt = ttWhite
+
+        size  = len(board.board)
+        board1d = []
+
+        for i in range(size):
+            if board.board[i] != 3:
+                board1d.append(board.board[i])
+    
+        hashCode = hasher.hash(board1d)
+   
+
+        result = tt.lookup(hashCode)
+
+        if result:
+            return result
+        
         outcome =  board.detect_five_in_a_row()
 
         # Check if terminal board
         if (board.get_empty_points().size == 0 or outcome):
-            #return self.evaluate_score_endgame(board, outcome), None
-            return self.storeResult(self.evaluate_score_endgame(board,outcome), None)
+            result = self.evaluate_score_endgame(board, outcome), None
+            self.storeResult(result, tt, hashCode)
+            return result
+            
 
         # Order moves by heuristic
-        #moves = board.get_empty_points()
-        #self.board = board
+        moves = board.get_empty_points()
+        self.board = board
 
         #TODO: Right now timeouts while calculating best move using Heuristic
-        #moves = sorted(moves, key = self.evaluate_move_heuristic, reverse = True)
+        moves = sorted(moves, key = self.evaluate_move_heuristic, reverse = True)
+        
 
-        # Choose best move
-        #best = moves[0]
-
-        moves = board.get_empty_points()
+        #Choose best move
         best = moves[0]
+
         for m in moves:
+
             board.play_move(m, board.current_player)
-            value, _ = self.minimax(board, -beta, -alpha, tt)
+            value, _ = self.minimax(board, -beta, -alpha, ttBlack, ttWhite, hasher)
             value = -value
             if value > alpha:
                 alpha = value
                 best = m
             board.undo_move(m)
             if value >= beta: 
-                #result = beta, m
-                #return result
-                return self.storeResult(beta, m)
+                result = beta, m
+                self.storeResult(result, tt, hashCode) 
+                return result
+            
 
-        #result = alpha, best
-        #return result
-        return self.storeResult(alpha, best)
+        result = alpha, best
+        self.storeResult(result, tt, hashCode)
+        return result
 
     def evaluate_score_endgame(self, board, outcome):
         if(outcome):
@@ -109,20 +150,26 @@ class GomokuSolver:
             return 0
     
     def evaluate_move_heuristic(self, move):
-        self.board.play_move(m, self.board.current_player)
+        self.board.play_move(move, self.board.current_player)
         score = -self.evaluate_state_heuristic()
-        self.board.undo_move(m)
+        self.board.undo_move(move)
         return score
     
     def evaluate_state_heuristic(self):
+        outcome = self.board.detect_five_in_a_row()
+        if(outcome != 0):
+            return -10000
+        
         score = 0
-        line = self.rows + self.cols + self.diags
+        lines = self.board.rows + self.board.cols + self.board.diags
 
         for line in lines:
             for i in range(len(line) - 5):
                 line_score = 0
-                myCount, oppCount, countEmpty = count_stones(line[i:i+5])
+                myCount, oppCount = self.count_stones(line[i:i+5])
                 line_score = self.weights[myCount] - self.weights[oppCount]
+                if myCount >= 1 and oppCount >= 1:
+                    line_score = 0
                 score += line_score
 
         return score
@@ -132,7 +179,6 @@ class GomokuSolver:
 
         countBlack = 0
         countWhite = 0
-        countEmpty = 0
 
         for stone in line:
             stoneColor = self.board.board[stone]
@@ -141,8 +187,6 @@ class GomokuSolver:
                 countBlack += 1
             elif stoneColor == 2:
                 countWhite += 1
-            else:
-                countEmpty += 1
 
         if(self.board.current_player == 1):
             myCount = countBlack
@@ -151,4 +195,4 @@ class GomokuSolver:
             myCount = countWhite
             oppCount = countBlack
 
-        return myCount, oppCount, countEmpty
+        return myCount, oppCount
