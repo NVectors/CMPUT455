@@ -3,6 +3,8 @@ from board_util import GoBoardUtil
 from board import GoBoard
 import numpy as np
 import random
+from sys import stdin, stdout, stderr
+
 
 class ZobristHasher:
 
@@ -42,6 +44,7 @@ class TranspositionTable(object):
         return self.table.get(code)
 
 
+
 class GomokuSolver:
     def __init__(self):
         self.int_to_color = {1:"b", 2:"w"}
@@ -52,6 +55,15 @@ class GomokuSolver:
 
     def handler(self, signum, frame):
         raise TimeoutError
+
+    def point_to_coord(self, point, boardsize):
+        """
+        Transform point given as board array index 
+        to (row, col) coordinate representation.
+        Special case: PASS is not transformed
+        """
+        NS = boardsize + 1
+        return divmod(point, NS)
 
     def solve(self, board, time, tt, hasher):
         # Set alarm
@@ -81,6 +93,7 @@ class GomokuSolver:
 
     def storeResult(self, result, tt, hashCode):
         tt.store(hashCode, result)
+
 
     def minimax(self, board, alpha, beta, ttBlack, ttWhite, hasher):
 
@@ -127,6 +140,17 @@ class GomokuSolver:
         for m in moves:
 
             board.play_move(m, board.current_player)
+            if(self.check_double_threat(board, m)):
+                result = self.infinity, m
+                board.undo_move(m)
+                self.storeResult(result, tt, hashCode)
+                return result
+            else:
+                board.undo_move(m)
+            
+
+        for m in moves:
+            board.play_move(m, board.current_player)
             value, _ = self.minimax(board, -beta, -alpha, ttBlack, ttWhite, hasher)
             value = -value
             if value > alpha:
@@ -142,6 +166,82 @@ class GomokuSolver:
         result = alpha, best
         self.storeResult(result, tt, hashCode)
         return result
+
+    def check_double_threat(self, board, m):
+        mr, mc= self.point_to_coord(m, board.size)
+        mr = mr -1
+        mc = mc -1
+        board2d = GoBoardUtil.get_twoD_board(board)
+        thrtCnt = 0
+
+
+        try:
+            if(mr + 4 < board.size and board2d[mr + 1, mc] == board2d[mr, mc] and board2d[mr, mc] == board2d[mr+2, mc] and board2d[mr+3, mc] == 0  and board2d[mr+4, mc] == 0):
+                #stdout.write("yo\n")
+                thrtCnt+=1
+        except IndexError:
+            pass
+        try:
+            if(mr - 4 >= 0 and board2d[mr - 1, mc] == board2d[mr, mc] and board2d[mr, mc] == board2d[mr-2, mc] and board2d[mr-3, mc] == 0  and board2d[mr-4, mc] == 0):
+               # stdout.write("yo2\n")
+                thrtCnt+=1
+        except IndexError:
+            pass
+
+        try:
+
+            if(mc + 4 < board.size and board2d[mr , mc + 1] == board2d[mr, mc] and board2d[mr, mc] == board2d[mr, mc+2] and board2d[mr, mc+3] == 0 and board2d[mr, mc+4] == 0):
+                #stdout.write("yo3\n")
+                thrtCnt+=1
+        except IndexError:
+            pass
+
+        try:
+
+            if(mc - 4 >= 0 and board2d[mr, mc-1] == board2d[mr, mc] and board2d[mr, mc] == board2d[mr, mc-2] and board2d[mr, mc-3] == 0 and board2d[mr, mc-4] == 0):
+                #stdout.write("yo4\n")
+                thrtCnt+=1
+        except IndexError:
+            pass
+
+        try:
+
+            if(mc - 4 >= 0 and mr - 4 >= 0 and board2d[mr -1, mc-1] == board2d[mr, mc] and board2d[mr, mc] == board2d[mr -2, mc-2] and board2d[mr-3, mc-3] == 0 and board2d[mr-4, mc-4] == 0):
+                #stdout.write("yo5\n")
+                thrtCnt+=1
+        except IndexError:
+            pass
+
+        try:
+
+            if(mr + 4 < board.size and mc + 4 < board.size and board2d[mr+1, mc+1] == board2d[mr, mc] and board2d[mr, mc] == board2d[mr+2, mc+2] and board2d[mr+3, mc+3] == 0 and board2d[mr+4, mc+4] == 0):
+                #stdout.write("yo6\n")
+                thrtCnt+=1
+        except IndexError:
+            pass
+
+        try:
+
+            if(mr + 4 < board.size and mc - 4 >= 0  and board2d[mr+1, mc-1] == board2d[mr, mc] and board2d[mr, mc] == board2d[mr+2, mc-2] and board2d[mr+3, mc-3] == 0) and board2d[mr+4, mc-4] == 0:
+                #stdout.write("yo7\n")
+                thrtCnt+=1
+        except IndexError:
+            pass
+
+        try:
+
+            if(mc + 4 < board.size and mr - 4 >= 0 and board2d[mr-1, mc+1] == board2d[mr, mc] and board2d[mr, mc] == board2d[mr-2, mc+2] and board2d[mr-3, mc+3] == 0 and board2d[mr-4, mc+4] == 0):
+                #stdout.write("yo8\n")
+                thrtCnt+=1
+        except IndexError:
+            pass
+        
+        #stdout.write(str(thrtCnt) + "\n")
+        if(thrtCnt >=2):
+            #stdout.write(str(mr) + "\n" +str(mc) +"\n")
+            return True
+        else:
+            return False
 
     def evaluate_score_endgame(self, board, outcome):
         if(outcome):
@@ -159,7 +259,7 @@ class GomokuSolver:
         outcome = self.board.detect_five_in_a_row()
         if(outcome != 0):
             return -10000
-        
+   
         score = 0
         lines = self.board.rows + self.board.cols + self.board.diags
 
