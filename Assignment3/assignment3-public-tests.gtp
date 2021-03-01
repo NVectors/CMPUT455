@@ -1,0 +1,220 @@
+boardsize 7
+policy rule_based
+clear_board
+play B A7
+play W B7
+play B C7
+play W D7
+play B E7
+play W F7
+play B G7
+play W G6
+play B F6
+play W E6
+play B D6
+play W C6
+play B B6
+play W A6
+play B A5
+play W B5
+play B C5
+play W D5
+play B E5
+play W F5
+play B G5
+play W G4
+play B F4
+play W E4
+play B D4
+play W C4
+play B B4
+play W A4
+play B F1
+play W A3
+play B E1
+play W C3
+play B D1
+play W E3
+play B B3
+play W G3
+play B F3
+play W A1
+play B D3
+play W D2
+play B C2
+play W B2
+play B A2
+play W F2
+play B E2
+play W G2
+10 policy_moves
+#?[OpenFour C1]
+
+clear_board
+play B B7
+play W C7
+play B C6
+play W D6
+play B D7
+play W E7
+play B E6
+play W F5
+play B E5
+play W D5
+play B C5
+play W A6
+play B B6
+play W B5
+play B C4
+play W D4
+play B E4
+play W C3
+play B D3
+play W E3
+play B F3
+play W F4
+play B E2
+play W F2
+play B G1
+play W G2
+play B G3
+play W G4
+play B G5
+play W G6
+play B G7
+play W F7
+play B F6
+play W D2
+play B B4
+play W F1
+play B A4
+play W A3
+play B B3
+play W A5
+play B A7
+play W C1
+play B C2
+play W D1
+play B E1
+play W B2
+play B A2
+play W A1
+20 policy_moves
+#?[Random B1]
+
+policy random
+clear_board
+play B B7
+play W C7
+play B C6
+play W D6
+play B D7
+play W E7
+play B E6
+play W F5
+play B E5
+play W D5
+play B C5
+play W A6
+play B B6
+play W B5
+play B C4
+play W D4
+play B E4
+play W C3
+play B D3
+play W E3
+play B F3
+play W F4
+play B E2
+play W F2
+play B G1
+play W G2
+play B G3
+play W G4
+play B G5
+play W G6
+play B G7
+play W F7
+play B F6
+play W D2
+play B B4
+play W F1
+play B A4
+play W A3
+play B B3
+play W A5
+play B A7
+play W C1
+play B C2
+play W D1
+play B E1
+play W B2
+play B A2
+play W A1
+30 policy_moves
+#?[Random B1]
+
+play B B1
+40 policy_moves
+#?[]
+
+50 genmove W
+#?[pass]
+
+60 genmove B
+#?[pass]
+
+policy rule_based
+clear_board
+play B B1
+play W C2
+play B B2
+play W C3
+play B B3
+play W C4
+play B B4
+
+70 policy_moves
+#?[BlockWin B5]
+
+80 genmove W
+#?[b5|B5]
+
+play B A1
+90 policy_moves
+#?[OpenFour C5]
+play W C5
+play B A2
+100 policy_moves
+#?[Win C1 C6]
+110 genmove W
+#?[C1|C6]
+
+clear_board
+boardsize 8
+play B D2
+play W A2
+play B D3
+play W A3
+play B D4
+
+120 policy_moves
+#?[BlockOpenFour D1 D5 D6]
+
+boardsize 6
+130 policy_moves
+#?[Random A1 A2 A3 A4 A5 A6 B1 B2 B3 B4 B5 B6 C1 C2 C3 C4 C5 C6 D1 D2 D3 D4 D5 D6 E1 E2 E3 E4 E5 E6 F1 F2 F3 F4 F5 F6] 
+
+boardsize 8
+clear_board
+
+play B A3
+play W D1
+play B A4
+play W D2
+play B A5
+policy rule_based 
+
+140 policy_moves
+#?[BlockOpenFour A2 A6]
