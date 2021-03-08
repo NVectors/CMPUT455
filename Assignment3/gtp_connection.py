@@ -21,6 +21,7 @@ from board_util import (
 import numpy as np
 import re
 
+POLICY = "random"
 
 class GtpConnection:
     def __init__(self, go_engine, board, debug_mode=False):
@@ -277,7 +278,13 @@ class GtpConnection:
             self.respond("Illegal move: {}".format(move_as_string))
 
     def policy_cmd(self, args):
-        self.respond()
+        if args[0] != "random" and args[0] != "rulebased":
+            self.respond("Unknown Policy")
+        else:
+            global POLICY
+            POLICY = args[0]
+            self.respond("Policy set to " + POLICY)
+        
 
     def policy_move_cmd(self, args):
         self.respond()
