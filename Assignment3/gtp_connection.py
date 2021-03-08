@@ -286,7 +286,7 @@ class GtpConnection:
             self.respond("Policy set to " + POLICY)
         
 
-    def policy_move_cmd(self, args):
+    def policy_moves_cmd(self, args):
         self.respond()
 
     """ Assignment 3 Code ends here """

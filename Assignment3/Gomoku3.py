@@ -43,3 +43,5 @@ class Gomoku3(object):
         if state.toPlay == WHITE:
             eval = 1 - eval
         return eval
+
+Gomoku3()
