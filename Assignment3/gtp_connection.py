@@ -57,7 +57,9 @@ class GtpConnection:
             "gogui-rules_side_to_move": self.gogui_rules_side_to_move_cmd,
             "gogui-rules_board": self.gogui_rules_board_cmd,
             "gogui-rules_final_result": self.gogui_rules_final_result_cmd,
-            "gogui-analyze_commands": self.gogui_analyze_cmd
+            "gogui-analyze_commands": self.gogui_analyze_cmd,
+            "policy": self.policy_cmd,
+            "policy_moves": self.policy_moves_cmd
         }
 
         # used for argument checking
@@ -250,6 +252,8 @@ class GtpConnection:
         except Exception as e:
             self.respond("illegal move: {}".format(str(e).replace('\'','')))
     
+    """ Assignment 3 Code starts here """
+    
     def genmove_cmd(self, args):
         """
         Generate a move for the color args[0] in {'b', 'w'}, for the game of gomoku.
@@ -271,6 +275,14 @@ class GtpConnection:
             self.respond(move_as_string.lower())
         else:
             self.respond("Illegal move: {}".format(move_as_string))
+
+    def policy_cmd(self, args):
+        self.respond()
+
+    def policy_move_cmd(self, args):
+        self.respond()
+
+    """ Assignment 3 Code ends here """
 
     def gogui_rules_game_id_cmd(self, args):
         self.respond("Gomoku")
