@@ -287,7 +287,7 @@ class GtpConnection:
                     best_move = move   
                 # Num of simulations required for each move (Required: 10)
                 for i in range(self.numSimulations):     
-                    if random_sim(self.board.copy(), color):
+                    if random_sim(self.board.copy(), color, color):
                         win += 1
                 # Update after each move if it better than prev. move
                 if (win/10) > best_ratio:
@@ -452,11 +452,11 @@ def color_to_int(c):
     except:
         raise KeyError("\"{}\" wrong color".format(c))
 
-def random_sim(board, color):
+def random_sim(board, org_color, cur_color):
     # Check the base cases
     result = board.detect_five_in_a_row()
     # Winner occured
-    if result == color:
+    if result == org_color:
         return True
 
     # Get list of playable points
@@ -468,8 +468,8 @@ def random_sim(board, color):
         return False
     
     # Play a move
-    board.play_move(move, color)
-    check = random_sim(board.copy(), color)
+    board.play_move(move, cur_color)
+    check = random_sim(board.copy(), org_color, GoBoardUtil.opponent(cur_color))
     board.undo_move(move)
 
     return check
