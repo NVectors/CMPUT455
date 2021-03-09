@@ -293,7 +293,9 @@ class GtpConnection:
                 if (win/10) > best_ratio:
                     best_move = move
                     best_ratio = (win/10)
+
         elif (POLICY == "rulebased"):
+            #TO-DO
             self.respond()
 
         if best_move == PASS:
@@ -474,3 +476,6 @@ def random_sim(board, org_color, cur_color):
 
     return check
     
+def rules_sim():
+    #TO-DO
+    return None
