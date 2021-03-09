@@ -351,7 +351,78 @@ class GoBoard(object):
             if counter == 5 and prev != EMPTY:
                 return prev
         return EMPTY
+    
+    """ Assignment 3 Code starts here """
 
     def undo_move(self, move):
+        """ Revert a coloured point back to empty point """
         self.board[move] = EMPTY
-        #self.current_player = GoBoardUtil.opponent(self.current_player)
+
+    def check_block_win(self, color):
+        """ Check if opponent can win directly, and block it """
+        numBlocks = 0
+        opp_color = GoBoardUtil.opponent(color)
+        points = self.get_color_points(opp_color)
+        for point in points:
+            if self.locate_block_win(point):
+                numBlocks += 1
+        return numBlocks
+        
+
+    def locate_block_win(self, point):
+        """ Check in all four directions if opponent can win directly"""
+        # Check horizontal
+        if self.BW_detect_four_in_a_row(point, 1):
+            return True
+        # Check vertical
+        if self.BW_detect_four_in_a_row(point,self.size):
+            return True
+        # Check Diagonal / (SW TO NE)
+        if self.BW_detect_four_in_a_row(point, self.size-1):
+            return True
+        # Check Diagonal \ (SE TO NW)
+        if self.BW_detect_four_in_a_row(point, self.size+1):
+            return True
+        return False
+
+    def BW_detect_four_in_a_row(self, point, direction):
+        """ Shift in positive and negative direction to detect direct wins """
+        p = point
+        d = direction
+        color = self.board[point]
+        count = 0
+        empty_count = 0
+
+        while (True):
+            p = p + d   # Shift in positive direction 
+            if self.board[p] == color:
+                count += 1
+            elif self.board[p] == EMPTY:
+                empty_count += 1
+                if empty_count >= 2:
+                    break
+            else:
+                break
+        if count >= 4 and empty_count >= 1:      # Four or more stones connected
+            return True     # There is a winner
+
+        p = point
+        d = direction
+        color = self.board[point]
+        count = 0
+        empty_count = 0
+
+        while (True):
+            p = p - d   # Shift in negative direction
+            if self.board[p] == color:
+                count += 1
+            elif self.board[p] == EMPTY:
+                empty_count += 1
+                if empty_count >= 2:
+                    break
+            else:
+                break
+        if count >= 4 and empty_count >= 1:      # Four or more stones connected
+            return True     # There is a winner
+
+        return False
