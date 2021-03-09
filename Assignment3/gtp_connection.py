@@ -8,6 +8,8 @@ at the University of Edinburgh.
 """
 import traceback
 from sys import stdin, stdout, stderr
+
+from numpy.lib.function_base import copy
 from board_util import (
     GoBoardUtil,
     BLACK,
@@ -20,6 +22,7 @@ from board_util import (
 )
 import numpy as np
 import re
+import random
 
 POLICY = "random"
 
@@ -35,6 +38,8 @@ class GtpConnection:
         board: 
             Represents the current board state.
         """
+        self.numSimulations = 10    # 10 sims required by the specs
+
         self._debug_mode = debug_mode
         self.go_engine = go_engine
         self.board = board
@@ -59,8 +64,8 @@ class GtpConnection:
             "gogui-rules_board": self.gogui_rules_board_cmd,
             "gogui-rules_final_result": self.gogui_rules_final_result_cmd,
             "gogui-analyze_commands": self.gogui_analyze_cmd,
-            "policy": self.policy_cmd,
-            "policy_moves": self.policy_moves_cmd
+            "policy": self.policy_cmd,              # Policy type: random or rulebased
+            "policy_moves": self.policy_moves_cmd   # Set of moves considered by the sim policy 
         }
 
         # used for argument checking
@@ -253,12 +258,16 @@ class GtpConnection:
         except Exception as e:
             self.respond("illegal move: {}".format(str(e).replace('\'','')))
     
-    """ Assignment 3 Code starts here """
+    """ Assignment 3 Code inside Class starts here """
     
     def genmove_cmd(self, args):
         """
         Generate a move for the color args[0] in {'b', 'w'}, for the game of gomoku.
         """
+
+        board_color = args[0].lower()
+        color = color_to_int(board_color)
+
         result = self.board.detect_five_in_a_row()
         if result == GoBoardUtil.opponent(self.board.current_player):
             self.respond("resign")
@@ -266,13 +275,37 @@ class GtpConnection:
         if self.board.get_empty_points().size == 0:
             self.respond("pass")
             return
-        board_color = args[0].lower()
-        color = color_to_int(board_color)
-        move = self.go_engine.get_move(self.board, color)
-        move_coord = point_to_coord(move, self.board.size)
+       
+        moves = self.board.get_empty_points()
+        if (POLICY == "random"):
+            best_move = None
+            best_ratio = 0
+
+            for move in moves:
+                win = 0     #Default value before simulating each move
+                if best_move == None:
+                    best_move = move   
+                # Num of simulations required for each move (Required: 10)
+                for i in range(self.numSimulations):     
+                    if random_sim(self.board.copy(), color, color):
+                        win += 1
+                # Update after each move if it better than prev. move
+                if (win/10) > best_ratio:
+                    best_move = move
+                    best_ratio = (win/10)
+
+        elif (POLICY == "rulebased"):
+            #TO-DO
+            self.respond()
+
+        if best_move == PASS:
+            self.respond("pass")
+            return
+        #move = self.go_engine.get_move(self.board, color)
+        move_coord = point_to_coord(best_move, self.board.size)
         move_as_string = format_point(move_coord)
-        if self.board.is_legal(move, color):
-            self.board.play_move(move, color)
+        if self.board.is_legal(best_move, color):
+            self.board.play_move(best_move, color)
             self.respond(move_as_string.lower())
         else:
             self.respond("Illegal move: {}".format(move_as_string))
@@ -289,7 +322,7 @@ class GtpConnection:
     def policy_moves_cmd(self, args):
         self.respond()
 
-    """ Assignment 3 Code ends here """
+    """ Assignment 3 Code inside Class ends here """
 
     def gogui_rules_game_id_cmd(self, args):
         self.respond("Gomoku")
@@ -420,3 +453,29 @@ def color_to_int(c):
         return color_to_int[c]
     except:
         raise KeyError("\"{}\" wrong color".format(c))
+
+def random_sim(board, org_color, cur_color):
+    # Check the base cases
+    result = board.detect_five_in_a_row()
+    # Winner occured
+    if result == org_color:
+        return True
+
+    # Get list of playable points
+    moves = board.get_empty_points().size
+    if moves != 0:
+        move = random.choice(board.get_empty_points())
+    else:
+    # Draw occured
+        return False
+    
+    # Play a move
+    board.play_move(move, cur_color)
+    check = random_sim(board.copy(), org_color, GoBoardUtil.opponent(cur_color))
+    board.undo_move(move)
+
+    return check
+    
+def rules_sim():
+    #TO-DO
+    return None
