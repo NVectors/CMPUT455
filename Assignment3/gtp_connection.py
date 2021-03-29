@@ -549,10 +549,10 @@ class GtpConnection:
             maxScore = RANDOM
 
             if(board.detect_five_in_a_row() ==  color):
-                maxScore == WIN
+                maxScore = WIN
 
             elif(board.check_block_win(color) < numBlocks):
-                maxScore == BLOCKWIN
+                maxScore = BLOCKWIN
 
             elif(board.check_open_four(color) > numOpenWins):
                 maxScore = OPENFOUR
