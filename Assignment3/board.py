@@ -390,7 +390,7 @@ class GoBoard(object):
         p = point
         d = direction
         color = self.board[point]
-        count = 0
+        count = 1
         empty_count = 0
 
         while (True):
@@ -411,7 +411,7 @@ class GoBoard(object):
         p = point
         d = direction
         color = self.board[point]
-        count = 0
+        count = 1
         empty_count = 0
 
         while (True):
@@ -434,8 +434,7 @@ class GoBoard(object):
     def check_open_four(self, color):
             """ Check if current player can get a open four """
             numWins = 0
-            opp_color = GoBoardUtil.opponent(color)
-            points = self.get_color_points(opp_color)
+            points = self.get_color_points(color)
             for point in points:
                 if self.locate_open_four(point):
                     numWins += 1
@@ -472,7 +471,8 @@ class GoBoard(object):
                 if left > 4:    #Checking if it is open four ..OOOO..
                     break
             elif self.board[p] == EMPTY:
-                l_empty_count += 1
+                l_empty_count = 1
+                break
             else:
                 break
 
@@ -489,7 +489,8 @@ class GoBoard(object):
                 if right > 4:   #Checking if it is open four ..OOOO..
                     break
             elif self.board[p] == EMPTY:
-                r_empty_count += 1
+                r_empty_count = 1
+                break
             else:
                 break
 
