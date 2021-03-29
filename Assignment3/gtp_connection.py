@@ -558,3 +558,46 @@ def best_rule_moves(self, board, color):
             bestMoveSet.append(move)
 
     return bestMoveSet
+
+def checkMove(self, board, move, color):
+        """
+        Score Values
+            5 - WIN
+            4 - BLOCKWIN
+            3 - OPENFOUR
+            2 - BLOCKOPEN4
+            1 - RANDOM
+        """
+
+        WIN = 5
+        BLOCKWIN = 4
+        OPENFOUR = 3
+        BLOCKOPEN4 = 2
+        RANDOM = 1
+
+        numBlocks = board.check_block_win(color)
+        numOpenWins = board.check_open_four(color)
+        numOpenBlocks = board.check_block_open_four(color)
+
+        # Play the move
+        board.play_move(move, color)
+
+        maxScore = RANDOM
+
+        if(board.detect_five_in_a_row() ==  color):
+            maxScore == WIN
+
+        elif(board.check_block_win(color) < numBlocks):
+            maxScore == BLOCKWIN
+
+        elif(board.check_open_four(color) > numOpenWins):
+            maxScore = OPENFOUR
+
+        elif(board.check_block_open_four(color) < numOpenBlocks):
+            maxScore = BLOCKOPEN4
+            
+        
+
+        board.undo_move(move)
+
+        return maxScore
