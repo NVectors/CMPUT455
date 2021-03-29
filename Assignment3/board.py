@@ -462,7 +462,7 @@ class GoBoard(object):
         d = direction
         color = self.board[point]
         l_empty_count = 0
-        left = 0
+        left = 1
 
         while (True):
             p = p + d   # Shift in positive direction 
@@ -480,7 +480,7 @@ class GoBoard(object):
         d = direction
         color = self.board[point]
         r_empty_count = 0
-        right = 0
+        right = 1
 
         while (True):
             p = p - d   # Shift in negative direction
@@ -534,7 +534,7 @@ class GoBoard(object):
         d = direction
         color = self.board[point]
         l_empty_count = 0
-        left = 0
+        left = 1
 
         while (True):
             p = p + d   # Shift in positive direction 
@@ -553,7 +553,7 @@ class GoBoard(object):
         d = direction
         color = self.board[point]
         r_empty_count = 0
-        right = 0
+        right = 1
 
         while (True):
             p = p - d   # Shift in negative direction
