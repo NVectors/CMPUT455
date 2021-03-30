@@ -1,6 +1,6 @@
-Script started on 2021-03-29 19:54:17-06:00 [TERM="xterm-256color" TTY="/dev/pts/2" COLUMNS="197" LINES="12"]
-]0;poulomi@ASUS: ~/Winter2021/CMPUT455/CMPUT455/Assignment3[01;32mpoulomi@ASUS[00m:[01;34m~/Winter2021/CMPUT455/CMPUT455/Assignment3[00m$ gogui-rr[Keh[Kgress Gomoku.op[K[Kpy assignment3-public-tests.gtp
+Script started on 2021-03-29 20:27:19-06:00 [TERM="xterm-256color" TTY="/dev/pts/1" COLUMNS="197" LINES="12"]
+]0;poulomi@ASUS: ~/Winter2021/CMPUT455/CMPUT455/Assignment3[01;32mpoulomi@ASUS[00m:[01;34m~/Winter2021/CMPUT455/CMPUT455/Assignment3[00m$ gogui-regress Gomoku3.py assignment3-public-tests.gtp
 ]0;poulomi@ASUS: ~/Winter2021/CMPUT455/CMPUT455/Assignment3[01;32mpoulomi@ASUS[00m:[01;34m~/Winter2021/CMPUT455/CMPUT455/Assignment3[00m$ exit
 exit
 
-Script done on 2021-03-29 19:54:35-06:00 [COMMAND_EXIT_CODE="0"]
+Script done on 2021-03-29 20:27:40-06:00 [COMMAND_EXIT_CODE="0"]
