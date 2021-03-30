@@ -535,17 +535,18 @@ class GoBoard(object):
         color = self.board[point]
         l_empty_count = 0
         left = 1
-
+        countl = 0
+        countr = 0
         while (True):
             p = p + d   # Shift in positive direction 
+            countl += 1
+            if(countl == 6):
+                break
             if self.board[p] == color:
                 left += 1
-                if left > 3:    #Checking if it going to be a open four ..OOO..
-                    break
+
             elif self.board[p] == EMPTY:
                 l_empty_count += 1
-                if l_empty_count > 1:
-                    break
             else:
                 break
 
@@ -557,21 +558,30 @@ class GoBoard(object):
 
         while (True):
             p = p - d   # Shift in negative direction
+            countr += 1
+            if(countr == 6):
+                break
             if self.board[p] == color:
                 right += 1
-                if right > 3:   #Checking if it going to be a open four ..OOO..
-                    break
             elif self.board[p] == EMPTY:
                 r_empty_count += 1
-                if r_empty_count > 1:
-                    break
             else:
                 break
 
-        # Three or more stones connected ..OOO.. 
-        if right >= 3 and r_empty_count >= 1 and l_empty_count >= 1:      
-            return True     
-        elif left >=3 and l_empty_count >= 1 and r_empty_count >= 1:
-            return True
+        # Three or more stones connected ..OOO..
+
+        if(l_empty_count + r_empty_count < 3):
+              
+            if right >= 3 and r_empty_count >= 2 and l_empty_count >= 1:      
+                return True     
+            elif left >=3 and l_empty_count >= 2 and r_empty_count >= 1:
+                return True
+        else:
+                    
+            if right >= 3 and r_empty_count >= 1 and l_empty_count >= 1:      
+                return True     
+            elif left >=3 and l_empty_count >= 1 and r_empty_count >= 1:
+                return True
+            
 
         return False
