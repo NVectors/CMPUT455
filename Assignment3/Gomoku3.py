@@ -6,42 +6,35 @@ from gtp_connection import GtpConnection
 from board_util import GoBoardUtil
 from board import GoBoard
 
-class Gomoku3(object):
+
+class Gomoku():
     def __init__(self):
-        self.numSimulations = 10 # 10 simulations for each legal move
+        """
+        Gomoku player that selects moves randomly from the set of legal moves.
+        Passes/resigns only at the end of the game.
 
-    def name(self):
-        return "Simulation Player ({0} sim.)".format(self.numSimulations)
+        Parameters
+        ----------
+        name : str
+            name of the player (used by the GTP interface).
+        version : float
+            version number (used by the GTP interface).
+        """
+        self.name = "GomokuAssignment2"
+        self.version = 1.0
 
-    def genmove(self):
-        assert not self.endOfGame()    #TO DO
-        moves = GoBoardUtil.generate_legal_moves(self.board, self.current_player)
-        numMoves = len(moves)
-        score = [0] * numMoves
-        for i in range(numMoves):
-            move = moves[i]
-            score[i] = self.simulate(self.board, move)
-        #print(score)
-        bestIndex = score.index(max(score))
-        best = moves[bestIndex]
-        #print("Best move:", best, "score", score[best])
-        assert best in GoBoardUtil.generate_legal_moves(self.board, self.current_player)
-        return best
+    def get_move(self, board, color):
+        return GoBoardUtil.generate_random_move(board, color)
 
-    def simulate(self, state, move):
-        stats = [0] * 3
-        state.play(move)
-        moveNr = state.moveNumber()
-        for _ in range(self.numSimulations):
-            winner, _ = state.simulate()
-            stats[winner] += 1
-            state.resetToMoveNumber(moveNr)
-        assert sum(stats) == self.numSimulations
-        assert moveNr == state.moveNumber()
-        state.undoMove()
-        eval = (stats[BLACK] + 0.5 * stats[EMPTY]) / self.numSimulations
-        if state.toPlay == WHITE:
-            eval = 1 - eval
-        return eval
 
-Gomoku3()
+def run():
+    """
+    start the gtp connection and wait for commands.
+    """
+    board = GoBoard(7)
+    con = GtpConnection(Gomoku(), board)
+    con.start_connection()
+
+
+if __name__ == "__main__":
+    run()
