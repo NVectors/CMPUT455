@@ -276,27 +276,8 @@ class GoBoard(object):
             return True
         elif self.board[point] != EMPTY:
             return False
-        # if point == self.ko_recapture:
-        #     return False
-
-        # General case: deal with captures, suicide, and next ko point
-        # opp_color = GoBoardUtil.opponent(color)
-        # in_enemy_eye = self._is_surrounded(point, opp_color)
+        
         self.board[point] = color
-        # single_captures = []
-        # neighbors = self._neighbors(point)
-        # for nb in neighbors:
-        #     if self.board[nb] == opp_color:
-        #         single_capture = self._detect_and_process_capture(nb)
-        #         if single_capture != None:
-        #             single_captures.append(single_capture)
-        # block = self._block_of(point)
-        # if not self._has_liberty(block):  # undo suicide move
-        #     self.board[point] = EMPTY
-        #     return False
-        # self.ko_recapture = None
-        # if in_enemy_eye and len(single_captures) == 1:
-        #     self.ko_recapture = single_captures[0]
         self.current_player = GoBoardUtil.opponent(color)
         self.last2_move = self.last_move
         self.last_move = point
@@ -370,7 +351,237 @@ class GoBoard(object):
             if counter == 5 and prev != EMPTY:
                 return prev
         return EMPTY
+    
+    """ Assignment 3 Code starts here """
 
     def undo_move(self, move):
+        """ Revert a coloured point back to empty point """
         self.board[move] = EMPTY
-        #self.current_player = GoBoardUtil.opponent(self.current_player)
+
+    ####################################################################################################
+    def check_block_win(self, color):
+        """ Check if opponent can win directly, and play move to block it"""
+        numBlocks = 0
+        opp_color = GoBoardUtil.opponent(color)
+        points = self.get_color_points(opp_color)
+        for point in points:
+            if self.locate_block_win(point):
+                numBlocks += 1
+        return numBlocks
+        
+    def locate_block_win(self, point):
+        """ Check in all four directions if opponent can win directly"""
+        # Check horizontal
+        if self.BW_detect_four_in_a_row(point, 1):
+            return True
+        # Check vertical
+        if self.BW_detect_four_in_a_row(point,self.size):
+            return True
+        # Check Diagonal / (SW TO NE)
+        if self.BW_detect_four_in_a_row(point, self.size-1):
+            return True
+        # Check Diagonal \ (SE TO NW)
+        if self.BW_detect_four_in_a_row(point, self.size+1):
+            return True
+        return False
+
+    def BW_detect_four_in_a_row(self, point, direction):
+        """ Shift in positive and negative direction to detect direct wins """
+        p = point
+        d = direction
+        color = self.board[point]
+        count = 1
+        empty_count = 0
+
+        while (True):
+            p = p + d   # Shift in positive direction 
+            if self.board[p] == color:
+                count += 1
+            elif self.board[p] == EMPTY:
+                empty_count += 1
+                if empty_count > 1:
+                    break
+            else:
+                break
+
+        # Four or more stones connected with atleast one empty spot -> .OOOO.
+        if count >= 4 and empty_count >= 1:      
+            return True     
+
+        p = point
+        d = direction
+        color = self.board[point]
+        count = 1
+        empty_count = 0
+
+        while (True):
+            p = p - d   # Shift in negative direction
+            if self.board[p] == color:
+                count += 1
+            elif self.board[p] == EMPTY:
+                empty_count += 1
+                if empty_count > 1: #Only checking for direct wins -> OO.OO
+                    break
+            else:
+                break
+
+        # Four or more stones connected with atleast one empty spot -> .OOOO.
+        if count >= 4 and empty_count >= 1:      
+            return True     
+
+        return False
+    ####################################################################################################
+    def check_open_four(self, color):
+            """ Check if current player can get a open four """
+            numWins = 0
+            points = self.get_color_points(color)
+            for point in points:
+                if self.locate_open_four(point):
+                    numWins += 1
+            return numWins
+
+    def locate_open_four(self, point):
+        """ Check in all four directions if current player can get open four"""
+        # Check horizontal
+        if self.detect_open_four(point, 1):
+            return True
+        # Check vertical
+        if self.detect_open_four(point,self.size):
+            return True
+        # Check Diagonal / (SW TO NE)
+        if self.detect_open_four(point, self.size-1):
+            return True
+        # Check Diagonal \ (SE TO NW)
+        if self.detect_open_four(point, self.size+1):
+            return True
+        return False
+
+    def detect_open_four(self, point, direction):
+        """ Shift in positive and negative direction to detect direct wins """
+        p = point
+        d = direction
+        color = self.board[point]
+        l_empty_count = 0
+        left = 1
+
+        while (True):
+            p = p + d   # Shift in positive direction 
+            if self.board[p] == color:
+                left += 1
+                if left > 4:    #Checking if it is open four ..OOOO..
+                    break
+            elif self.board[p] == EMPTY:
+                l_empty_count = 1
+                break
+            else:
+                break
+
+        p = point
+        d = direction
+        color = self.board[point]
+        r_empty_count = 0
+        right = 1
+
+        while (True):
+            p = p - d   # Shift in negative direction
+            if self.board[p] == color:
+                right += 1
+                if right > 4:   #Checking if it is open four ..OOOO..
+                    break
+            elif self.board[p] == EMPTY:
+                r_empty_count = 1
+                break
+            else:
+                break
+
+        # Four or more stones connected ..OOOO.., one extra empty spot gurantees us a win
+        if right >= 4 and r_empty_count == 1 and l_empty_count == 1:      
+            return True     
+        elif left >=4 and l_empty_count == 1 and r_empty_count == 1:
+            return True
+
+        return False
+    ####################################################################################################
+    def check_block_open_four(self, color):
+            """ Check if opponent can get a open four, and play a move to prevent it"""
+            numOpens = 0
+            opp_color = GoBoardUtil.opponent(color)
+            points = self.get_color_points(opp_color)
+            for point in points:
+                if self.locate_block_open_four(point):
+                    numOpens += 1
+            return numOpens
+    
+    def locate_block_open_four(self, point):
+        """ Check in all four directions if opponent can get open four"""
+        # Check horizontal
+        if self.detect_open_four_opp(point, 1):
+            return True
+        # Check vertical
+        if self.detect_open_four_opp(point,self.size):
+            return True
+        # Check Diagonal / (SW TO NE)
+        if self.detect_open_four_opp(point, self.size-1):
+            return True
+        # Check Diagonal \ (SE TO NW)
+        if self.detect_open_four_opp(point, self.size+1):
+            return True
+        return False
+
+    def detect_open_four_opp(self, point, direction):
+        """ Shift in positive and negative direction to detect open four for opponent """
+        p = point
+        d = direction
+        color = self.board[point]
+        l_empty_count = 0
+        left = 1
+        countl = 0
+        countr = 0
+        while (True):
+            p = p + d   # Shift in positive direction 
+            countl += 1
+            if(countl == 6):
+                break
+            if self.board[p] == color:
+                left += 1
+
+            elif self.board[p] == EMPTY:
+                l_empty_count += 1
+            else:
+                break
+
+        p = point
+        d = direction
+        color = self.board[point]
+        r_empty_count = 0
+        right = 1
+
+        while (True):
+            p = p - d   # Shift in negative direction
+            countr += 1
+            if(countr == 6):
+                break
+            if self.board[p] == color:
+                right += 1
+            elif self.board[p] == EMPTY:
+                r_empty_count += 1
+            else:
+                break
+
+        # Three or more stones connected ..OOO..
+
+        if(l_empty_count + r_empty_count < 3):
+              
+            if right >= 3 and r_empty_count >= 2 and l_empty_count >= 1:      
+                return True     
+            elif left >=3 and l_empty_count >= 2 and r_empty_count >= 1:
+                return True
+        else:
+                    
+            if right >= 3 and r_empty_count >= 1 and l_empty_count >= 1:      
+                return True     
+            elif left >=3 and l_empty_count >= 1 and r_empty_count >= 1:
+                return True
+            
+
+        return False

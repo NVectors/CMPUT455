@@ -26,6 +26,7 @@ import random
 
 POLICY = "random"
 
+
 class GtpConnection:
     def __init__(self, go_engine, board, debug_mode=False):
         """
@@ -65,7 +66,8 @@ class GtpConnection:
             "gogui-rules_final_result": self.gogui_rules_final_result_cmd,
             "gogui-analyze_commands": self.gogui_analyze_cmd,
             "policy": self.policy_cmd,              # Policy type: random or rulebased
-            "policy_moves": self.policy_moves_cmd   # Set of moves considered by the sim policy 
+            # Set of moves considered by the sim policy
+            "policy_moves": self.policy_moves_cmd
         }
 
         # used for argument checking
@@ -120,7 +122,8 @@ class GtpConnection:
                 self.commands[command_name](args)
             except Exception as e:
                 self.debug_msg("Error executing command {}\n".format(str(e)))
-                self.debug_msg("Stack Trace:\n{}\n".format(traceback.format_exc()))
+                self.debug_msg("Stack Trace:\n{}\n".format(
+                    traceback.format_exc()))
                 raise e
         else:
             self.debug_msg("Unknown command: {}\n".format(command_name))
@@ -188,7 +191,9 @@ class GtpConnection:
         """
         Reset the game with new boardsize args[0]
         """
+        # global POLICY
         self.reset(int(args[0]))
+        # POLICY = "random"
         self.respond()
 
     def showboard_cmd(self, args):
@@ -227,7 +232,7 @@ class GtpConnection:
             gtp_moves.append(format_point(coords))
         sorted_moves = " ".join(sorted(gtp_moves))
         self.respond(sorted_moves)
-        
+
     def play_cmd(self, args):
         """
         play a move args[1] for given color args[0] in {'b','w'}
@@ -248,7 +253,8 @@ class GtpConnection:
                 self.respond("unknown: {}".format(args[1]))
                 return
             if not self.board.play_move(move, color):
-                self.respond("illegal move: \"{}\" occupied".format(args[1].lower()))
+                self.respond(
+                    "illegal move: \"{}\" occupied".format(args[1].lower()))
                 return
             else:
                 self.debug_msg(
@@ -256,10 +262,10 @@ class GtpConnection:
                 )
             self.respond()
         except Exception as e:
-            self.respond("illegal move: {}".format(str(e).replace('\'','')))
-    
+            self.respond("illegal move: {}".format(str(e).replace('\'', '')))
+
     """ Assignment 3 Code inside Class starts here """
-    
+
     def genmove_cmd(self, args):
         """
         Generate a move for the color args[0] in {'b', 'w'}, for the game of gomoku.
@@ -275,18 +281,18 @@ class GtpConnection:
         if self.board.get_empty_points().size == 0:
             self.respond("pass")
             return
-       
+
         moves = self.board.get_empty_points()
         if (POLICY == "random"):
             best_move = None
             best_ratio = 0
 
             for move in moves:
-                win = 0     #Default value before simulating each move
+                win = 0  # Default value before simulating each move
                 if best_move == None:
-                    best_move = move   
+                    best_move = move
                 # Num of simulations required for each move (Required: 10)
-                for i in range(self.numSimulations):     
+                for i in range(self.numSimulations):
                     if random_sim(self.board.copy(), color, color):
                         win += 1
                 # Update after each move if it better than prev. move
@@ -294,9 +300,10 @@ class GtpConnection:
                     best_move = move
                     best_ratio = (win/10)
 
-        elif (POLICY == "rulebased"):
-            #TO-DO
-            self.respond()
+        elif (POLICY == "rule_based"):
+            # TO-DO
+
+            best_move = self.rules_sim(self.board, color)
 
         if best_move == PASS:
             self.respond("pass")
@@ -306,23 +313,71 @@ class GtpConnection:
         move_as_string = format_point(move_coord)
         if self.board.is_legal(best_move, color):
             self.board.play_move(best_move, color)
-            self.respond(move_as_string.lower())
+            self.respond(move_as_string.upper())
         else:
-            self.respond("Illegal move: {}".format(move_as_string))
+            self.respond("Illegal move: {}".format(move_as_string.upper()))
 
     def policy_cmd(self, args):
-        if args[0] != "random" and args[0] != "rulebased":
+        if args[0] != "random" and args[0] != "rule_based":
             self.respond("Unknown Policy")
         else:
             global POLICY
             POLICY = args[0]
             self.respond("Policy set to " + POLICY)
-        
 
     def policy_moves_cmd(self, args):
-        self.respond()
+        """ Assignment 3 Code inside Class ends here """
 
-    """ Assignment 3 Code inside Class ends here """
+        #print(POLICY)
+        color = self.board.current_player
+        outputString = ""
+        moves = self.board.get_empty_points()
+        moveStringList = []
+        scoreDict = {5: [], 4:[], 3:[], 2:[], 1:[]}
+        labelList = ["Random", "BlockOpenFour", "OpenFour", "BlockWin" , "Win"]
+        varout = 0
+
+        if (POLICY == "random"):
+            outputString += "Random"
+            for move in moves:
+                move_coord = point_to_coord(move, self.board.size)
+                move_as_string = format_point(move_coord)
+                moveStringList.append(move_as_string)
+            
+            moveStringList.sort()
+
+            for m in moveStringList:
+                outputString += " " + m
+
+        elif (POLICY == "rule_based"):
+            for move in moves:
+                move_coord = point_to_coord(move, self.board.size)
+                move_as_string = format_point(move_coord)
+                score = self.checkMove(self.board, move, color)
+                scoreDict[score].append(move_as_string.upper())
+
+            if(len(scoreDict[5]) >0):
+                varout = 5
+            elif(len(scoreDict[4]) >0):
+                varout = 4
+            elif(len(scoreDict[3]) >0):
+                varout = 3
+            elif(len(scoreDict[2]) >0):
+                varout = 2
+            elif(len(scoreDict[1]) >0):
+                varout = 1
+
+            
+            if(varout != 0):
+                scoreDict[varout].sort()
+                outputString = labelList[varout - 1]
+                for m in scoreDict[varout]:
+                    outputString += " " + m
+
+
+        if(len(moveStringList) == 0 and varout == 0):
+            outputString = ""
+        self.respond(outputString)
 
     def gogui_rules_game_id_cmd(self, args):
         self.respond("Gomoku")
@@ -390,6 +445,128 @@ class GtpConnection:
                      "pstring/Show Board/gogui-rules_board\n"
                      )
 
+    def rules_sim(self, board, cur_color):
+        emptyPoints = board.get_empty_points()
+
+        if (emptyPoints.size == 0):
+            return None
+
+        MoveWins = []
+
+        bestRuleMoves = self.best_rule_moves(board, cur_color)
+
+        for move, moveScore in bestRuleMoves:
+            winSimulation = self.simulate_move(board, move, cur_color)
+            MoveWins.append(winSimulation)
+
+        return bestRuleMoves[np.argmax(MoveWins)][0]
+
+
+    def simulate_move(self, board, move, color):
+        totalWins = 0
+
+        for i in range(self.numSimulations):
+            currentBoard = board.copy()
+
+            currentBoard.play_move(move, color)
+            opp = GoBoardUtil.opponent(color)
+
+            winner = EMPTY
+            numPasses = 0
+
+            while currentBoard.get_empty_points().size != 0:
+                currColor = currentBoard.current_player
+                bestMoves = self.best_rule_moves(currentBoard, currColor)
+
+                move, moveScore = random.choice(bestMoves)
+
+                if moveScore == 5:
+                    winner = currColor
+
+                # If color didnt win then play random move
+                currentBoard.play_move(move, currColor)
+
+                if move == PASS:
+                    numPasses += 1
+                else:
+                    numPasses = 0
+
+                # End simulation if more than 2 passes
+                if numPasses >= 2:
+                    break
+
+            if winner == color:
+                totalWins += 1
+
+            return totalWins
+
+
+    def best_rule_moves(self, board, color):
+
+        moveScores = []
+
+        for move in board.get_empty_points():
+            # TODO: Make checkMove and uncomment next line
+            moveScore = self.checkMove(board, move, color)
+
+            moveScores.append((move, moveScore))
+        # Sorts in descending order according moveScore
+        moveScores.sort(reverse=True, key=lambda x: x[1])
+
+        bestMoveSet = []
+        bestScore = 0
+
+        for move in moveScores:
+            if move[1] > bestScore:
+                bestScore = move[1]
+                bestMoveSet.append(move)
+
+        return bestMoveSet
+
+    def checkMove(self, board, move, color):
+            """
+            Score Values
+                5 - WIN
+                4 - BLOCKWIN
+                3 - OPENFOUR
+                2 - BLOCKOPEN4
+                1 - RANDOM
+            """
+
+            WIN = 5
+            BLOCKWIN = 4
+            OPENFOUR = 3
+            BLOCKOPEN4 = 2
+            RANDOM = 1
+
+            numBlocks = board.check_block_win(color)
+            numOpenWins = board.check_open_four(color)
+            numOpenBlocks = board.check_block_open_four(color)
+
+            # Play the move
+            board.play_move(move, color)
+
+            maxScore = RANDOM
+
+            if(board.detect_five_in_a_row() ==  color):
+                maxScore = WIN
+
+            elif(board.check_block_win(color) < numBlocks):
+                maxScore = BLOCKWIN
+
+            elif(board.check_open_four(color) > numOpenWins):
+                maxScore = OPENFOUR
+
+            elif(board.check_block_open_four(color) < numOpenBlocks):
+                maxScore = BLOCKOPEN4
+
+            
+
+            board.undo_move(move)
+
+            return maxScore
+
+
 def point_to_coord(point, boardsize):
     """
     Transform point given as board array index 
@@ -448,11 +625,12 @@ def move_to_coord(point_str, board_size):
 def color_to_int(c):
     """convert character to the appropriate integer code"""
     color_to_int = {"b": BLACK, "w": WHITE, "e": EMPTY, "BORDER": BORDER}
-    
+
     try:
         return color_to_int[c]
     except:
         raise KeyError("\"{}\" wrong color".format(c))
+
 
 def random_sim(board, org_color, cur_color):
     # Check the base cases
@@ -466,16 +644,15 @@ def random_sim(board, org_color, cur_color):
     if moves != 0:
         move = random.choice(board.get_empty_points())
     else:
-    # Draw occured
+        # Draw occured
         return False
-    
+
     # Play a move
     board.play_move(move, cur_color)
-    check = random_sim(board.copy(), org_color, GoBoardUtil.opponent(cur_color))
+    check = random_sim(board.copy(), org_color,
+                       GoBoardUtil.opponent(cur_color))
     board.undo_move(move)
 
     return check
-    
-def rules_sim():
-    #TO-DO
-    return None
+
+
