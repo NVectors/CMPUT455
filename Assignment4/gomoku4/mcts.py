@@ -4,9 +4,9 @@ This function is loosely based on https://github.com/Rochester-NRT/RocAlphaGo/bl
 """
 import os, sys
 import numpy as np
-#import random
-from board_util import GoBoardUtil, BLACK, WHITE, PASS
-from feature_moves import FeatureMoves
+import random
+from board_util import GoBoardUtil, BLACK, WHITE, PASS, EMPTY
+#from feature_moves import FeatureMoves
 from gtp_connection import point_to_coord, format_point
 
 
@@ -250,7 +250,7 @@ class MCTS(object):
         #self.use_pattern = use_pattern
         self.toplay = toplay
         self.exploration = exploration
-        self.simulation_policy = simulation_policy
+        self.playout_policy = simulation_policy
         #self.in_tree_knowledge = in_tree_knowledge
         for n in range(num_simulation):
             board_copy = board.copy()
@@ -263,7 +263,7 @@ class MCTS(object):
             return None
         moves_ls = sorted(moves_ls, key=lambda i: i[1], reverse=True)
         move = moves_ls[0]
-        self.print_stat(board, self._root, toplay)
+        # self.print_stat(board, self._root, toplay)
         # self.good_print(board,self._root,self.toplay,10)
         if move[0] == PASS:
             return None

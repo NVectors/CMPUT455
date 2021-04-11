@@ -325,11 +325,14 @@ class GtpConnection():
             return
         move=None
         try:
-            signal.alarm(int(self.timelimit))
+            # TODO timelimit command
+            #self.respond("Alarm set")
+            #signal.alarm(int(self.timelimit))
             self.sboard = self.board.copy()
             move = self.go_engine.get_move(self.board, color)
             self.board=self.sboard
-            signal.alarm(0)
+            #signal.alarm(0)
+            #self.respond("Alarm Disabled")
         except Exception as e:
             move=self.go_engine.best_move
 

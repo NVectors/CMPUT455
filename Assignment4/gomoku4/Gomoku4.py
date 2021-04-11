@@ -8,6 +8,7 @@ from simple_board import SimpleGoBoard
 
 import random
 import numpy as np
+from mcts import MCTS
 
 """
 
@@ -103,7 +104,7 @@ class GomokuSimulationPlayer(object):
             board, 
             toplay,
             #komi=self.komi,
-            limit=100
+            limit=100,
             #check_selfatari=self.check_selfatari,
             #use_pattern=self.use_pattern,
             num_simulation=100,
