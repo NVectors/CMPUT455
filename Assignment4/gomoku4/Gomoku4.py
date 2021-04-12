@@ -108,7 +108,7 @@ class GomokuSimulationPlayer(object):
             #check_selfatari=self.check_selfatari,
             #use_pattern=self.use_pattern,
             num_simulation=100,
-            exploration=0.4,
+            exploration=0.1,
             simulation_policy='random',
             #in_tree_knowledge=self.in_tree_knowledge,
         )

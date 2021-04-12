@@ -34,7 +34,7 @@ def play_move(board, move, color):
 def uct_val(node, child, exploration, max_flag):
     if child._n_visits == 0:
         return float("inf")
-    if max_flag:
+    if not(max_flag):
         return float(child._black_wins) / child._n_visits + exploration * np.sqrt(
             np.log(node._n_visits) / child._n_visits
         )
@@ -150,7 +150,7 @@ class MCTS(object):
             node.expand(board, color)
         while not node.is_leaf():
             # Greedily select next move.
-            max_flag = color
+            max_flag = color - 1
             move, next_node = node.select(self.exploration, max_flag)
             if move != PASS:
                 assert board.is_legal_gomoku(move, color)
@@ -217,11 +217,8 @@ class MCTS(object):
             undo(board, m)
         if res == BLACK:
             return 1.0
-        elif res == 'draw':
-            return 0.0
         else:
-            assert(res == WHITE)
-            return -1.0
+            return 0.0
 
 
     def get_move(
