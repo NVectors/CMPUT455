@@ -58,7 +58,7 @@ class GtpConnection():
             "policy": self.set_playout_policy, 
             "policy_moves": self.display_pattern_moves
         }
-        self.timelimit=2
+        self.timelimit = 60 # Time limit is 60 second per move
 
         # used for argument checking
         # values: (required number of arguments, 
@@ -230,7 +230,7 @@ class GtpConnection():
             self.respond("false")
 
     def list_commands_cmd(self, args):
-        """ list all supported GTP commands """
+        """ List all supported GTP commands """
         self.respond(' '.join(list(self.commands.keys())))
 
     def legal_moves_cmd(self, args):
@@ -249,7 +249,7 @@ class GtpConnection():
 
     def play_cmd(self, args):
         """
-        play a move args[1] for given color args[0] in {'b','w'}
+        Play a move args[1] for given color args[0] in {'b','w'}
         """
         try:
             board_color = args[0].lower()
@@ -281,12 +281,17 @@ class GtpConnection():
             self.respond('{}'.format(str(e)))
 
     def timelimit_cmd(self, args):
+        """
+        Set the time limit
+        """
         self.timelimit = args[0]
         self.respond('')
 
     def handler(self, signum, fram):
-        self.board = self.sboard
-        raise Exception("unknown")
+        """
+        Handler for signal 
+        """
+        raise TimeOut
 
     def solve_cmd(self, args):
         try:
@@ -326,19 +331,25 @@ class GtpConnection():
         move=None
         try:
             # TODO timelimit command
-            #self.respond("Alarm set")
-            #signal.alarm(int(self.timelimit))
+            # Set the alarm 
+            signal.alarm(int(self.timelimit))
+
             self.sboard = self.board.copy()
+            # Calls the function from MCTS class in mcts.py
             move = self.go_engine.get_move(self.board, color)
+            signal.alarm(0)
             self.board=self.sboard
-            #signal.alarm(0)
-            #self.respond("Alarm Disabled")
         except Exception as e:
-            move=self.go_engine.best_move
+            move = self.go_engine.best_move
+        except TimeOut:
+            # TO DO: Lose if playing a move takes longer then the time limit
+            self.respond("lost")
+            return
 
         if move == PASS:
             self.respond("pass")
             return
+
         move_coord = point_to_coord(move, self.board.size)
         move_as_string = format_point(move_coord)
         if self.board.is_legal_gomoku(move, color):
@@ -346,12 +357,16 @@ class GtpConnection():
             self.respond(move_as_string)
         else:
             self.respond("illegal move: {}".format(move_as_string))
+            # TO DO: Illegal move generated is an instant lost
+            self.respond("lost")
+            return
 
     def gogui_rules_game_id_cmd(self, args):
         self.respond("Gomoku")
     
     def gogui_rules_board_size_cmd(self, args):
         self.respond(str(self.board.size))
+
     """
     def legal_moves_cmd(self, args):
         #List legal moves for color args[0] in {'b','w'}
